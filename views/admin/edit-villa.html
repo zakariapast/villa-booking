@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit Villa</title>
+  <link rel="stylesheet" href="/public/css/admin.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
+  <style>
+    #cropPreview {
+      max-width: 100%;
+      max-height: 60vh;
+    }
+    #cropModal .modal-dialog {
+      max-width: 900px;
+    }
+    #discardImage {
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container mt-5">
+    <h1 class="mb-4">Edit Villa</h1>
+    <div class="text-end mb-3">
+      <a href="/admin/villas/list" class="btn btn-secondary">← Back to Villas</a>
+    </div>
+    <form id="editVillaForm" enctype="multipart/form-data">
+      <input type="hidden" id="villaId">
+
+      <div class="mb-3">
+        <label for="name" class="form-label">Villa Name</label>
+        <input type="text" class="form-control" id="name" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="location" class="form-label">Location (Text)</label>
+        <input type="text" class="form-control" id="location" required />
+      </div>
+
+      <div class="mb-3">
+        <label for="map" class="form-label">Google Maps Link</label>
+        <input type="url" class="form-control" id="map" />
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" rows="4" required></textarea>
+      </div>
+
+      <div class="mb-3">
+        <label for="image" class="form-label">Upload New Image</label>
+        <input class="form-control" type="file" id="image" accept="image/*">
+        <div class="form-text">Recommended: 1200x800px, max 1MB</div>
+      </div>
+
+      <div class="mb-3">
+        <img id="currentImage" src="" alt="Current Image" class="img-thumbnail mb-2" style="max-height: 200px;">
+        <button type="button" id="discardImage" class="btn btn-outline-danger btn-sm">Discard Current Image</button>
+      </div>
+
+      <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="visible">
+        <label class="form-check-label" for="visible">Visible to Public</label>
+      </div>
+
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Update Villa</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Crop Modal -->
+  <div class="modal fade" id="cropModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Crop Image</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <img id="cropPreview" src="">
+        </div>
+        <div class="modal-footer">
+          <button type="button" id="saveCrop" class="btn btn-success">Save Crop</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+  <script>
+    let cropper;
+    let croppedBlob;
+    const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+
+    const villaId = new URLSearchParams(window.location.search).get('id');
+    const form = document.getElementById('editVillaForm');
+
+    fetch(`/api/villas`)
+      .then(res => res.json())
+      .then(data => {
+        const villa = data.find(v => v.id === villaId);
+        if (!villa) return alert('Villa not found');
+        document.getElementById('villaId').value = villa.id;
+        document.getElementById('name').value = villa.name;
+        document.getElementById('location').value = villa.location;
+        document.getElementById('map').value = villa.map;
+        document.getElementById('description').value = villa.description;
+        document.getElementById('visible').checked = villa.visible;
+        document.getElementById('currentImage').src = villa.image;
+      });
+
+    document.getElementById('image').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('cropPreview').src = reader.result;
+        cropModal.show();
+        if (cropper) cropper.destroy();
+        cropper = new Cropper(document.getElementById('cropPreview'), {
+          aspectRatio: 3 / 2,
+          viewMode: 1,
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('saveCrop').addEventListener('click', () => {
+      cropper.getCroppedCanvas().toBlob(blob => {
+        croppedBlob = blob;
+        cropModal.hide();
+      });
+    });
+
+    document.getElementById('discardImage').addEventListener('click', () => {
+      document.getElementById('image').value = '';
+      document.getElementById('cropPreview').src = '';
+      croppedBlob = null;
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append('name', document.getElementById('name').value);
+      formData.append('location', document.getElementById('location').value);
+      formData.append('map', document.getElementById('map').value);
+      formData.append('description', document.getElementById('description').value);
+      formData.append('visible', document.getElementById('visible').checked);
+      if (croppedBlob) formData.append('image', croppedBlob, 'villa.jpg');
+
+      fetch(`/api/villas/${villaId}`, {
+        method: 'PUT',
+        body: formData
+      })
+        .then(res => res.json())
+        .then(() => {
+          alert('Villa updated successfully');
+          window.location.href = '/admin/villas/list';
+        })
+        .catch(() => alert('Update failed'));
+    });
+  </script>
+</body>
+</html>
