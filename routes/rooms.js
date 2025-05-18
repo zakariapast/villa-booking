@@ -1,66 +1,43 @@
+// routes/rooms.js (MongoDB version)
+
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-
 const router = express.Router();
-const villasPath = path.join(__dirname, '..', 'data', 'villas.json');
+const { v4: uuidv4 } = require('uuid');
+const connectToDB = require('../config/db');
 
-// GET all rooms of a villa
-router.get('/api/rooms/list', (req, res) => {
-  const villaId = req.query.villa;
+// GET all rooms or filter by villaId
+router.get('/rooms', async (req, res) => {
   try {
-    const villas = JSON.parse(fs.readFileSync(villasPath, 'utf-8'));
-    const villa = villas.find(v => v.id === villaId);
-    if (!villa) return res.status(404).json({ error: 'Villa not found' });
-    res.json(villa.rooms || []);
+    const db = await connectToDB();
+    const query = req.query.villaId ? { villaId: req.query.villaId } : {};
+    const rooms = await db.collection('rooms').find(query).toArray();
+    res.json(rooms);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to load rooms' });
+    console.error('Failed to fetch rooms:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// POST add room to a villa
-router.post('/api/rooms', (req, res) => {
-  const { villaId, room } = req.body;
-  try {
-    const villas = JSON.parse(fs.readFileSync(villasPath, 'utf-8'));
-    const villa = villas.find(v => v.id === villaId);
-    if (!villa) return res.status(404).json({ error: 'Villa not found' });
-    villa.rooms = villa.rooms || [];
-    villa.rooms.push(room);
-    fs.writeFileSync(villasPath, JSON.stringify(villas, null, 2));
-    res.status(201).json({ message: 'Room added', room });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to save room' });
-  }
-});
+// POST a new room
+router.post('/rooms', async (req, res) => {
+  const newRoom = {
+    id: uuidv4(),
+    villaId: req.body.villaId,
+    name: req.body.name,
+    description: req.body.description,
+    price: req.body.price,
+    image: req.body.image || '',
+    amenities: req.body.amenities || [],
+    createdAt: new Date()
+  };
 
-// PUT update a room
-router.put('/api/rooms/:villaId/:roomIndex', (req, res) => {
-  const { villaId, roomIndex } = req.params;
   try {
-    const villas = JSON.parse(fs.readFileSync(villasPath, 'utf-8'));
-    const villa = villas.find(v => v.id === villaId);
-    if (!villa || !villa.rooms[roomIndex]) return res.status(404).json({ error: 'Room not found' });
-    villa.rooms[roomIndex] = req.body;
-    fs.writeFileSync(villasPath, JSON.stringify(villas, null, 2));
-    res.json({ message: 'Room updated' });
+    const db = await connectToDB();
+    await db.collection('rooms').insertOne(newRoom);
+    res.status(201).json({ message: 'Room added successfully', room: newRoom });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to update room' });
-  }
-});
-
-// DELETE a room
-router.delete('/api/rooms/:villaId/:roomIndex', (req, res) => {
-  const { villaId, roomIndex } = req.params;
-  try {
-    const villas = JSON.parse(fs.readFileSync(villasPath, 'utf-8'));
-    const villa = villas.find(v => v.id === villaId);
-    if (!villa || !villa.rooms[roomIndex]) return res.status(404).json({ error: 'Room not found' });
-    villa.rooms.splice(roomIndex, 1);
-    fs.writeFileSync(villasPath, JSON.stringify(villas, null, 2));
-    res.json({ message: 'Room deleted' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete room' });
+    console.error('Failed to add room:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
