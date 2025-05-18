@@ -1,0 +1,14 @@
+[
+  {
+    "id": "511a504b-f87d-4dc8-b3bd-a16f7c46b37c",
+    "name": "🏡 Cabin Villa in Singaraja",
+    "location": "Singaraja",
+    "map": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d63195.48960988213!2d115.03487986018396!3d-8.130155705850862!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2dd19a7f2b0656a1%3A0xfe1f91450bc82961!2sSingaraja%2C%20Banyuasri%2C%20Buleleng%2C%20Buleleng%20Regency%2C%20Bali!5e0!3m2!1sen!2sid!4v1747477263868!5m2!1sen!2sid\" width=\"400\" height=\"300\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\" referrerpolicy=\"no-referrer-when-downgrade\"",
+    "description": "123",
+    "images": [
+      "/uploads/1432fad5-d916-468e-bfba-7aab433b7d37.jpg"
+    ],
+    "visible": true,
+    "image": "/uploads/0de8baa1-2eb5-46d1-84de-f0eeeaaafb7f.jpg"
+  }
+]
