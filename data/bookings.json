@@ -1,0 +1,24 @@
+[
+  {
+    "name": "zaki",
+    "email": "zaki@gmail.com",
+    "date": "2025-05-15",
+    "guests": "2",
+    "requests": "nothing"
+  },
+  {
+    "name": "a",
+    "email": "a@gmail.com",
+    "date": "2025-06-20",
+    "guests": "2",
+    "requests": "no"
+  },
+  {
+    "name": "z",
+    "email": "z@gmail.com",
+    "checkin": "2025-05-14",
+    "checkout": "2025-05-17",
+    "guests": "2",
+    "requests": "no"
+  }
+]
