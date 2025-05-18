@@ -1,52 +1,43 @@
+// routes/bookings.js (MongoDB version)
+
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
-
 const router = express.Router();
-const bookingsPath = path.join(__dirname, '..', 'data', 'bookings.json');
-
-// Ensure bookings file exists
-if (!fs.existsSync(bookingsPath)) fs.writeFileSync(bookingsPath, '[]');
+const { v4: uuidv4 } = require('uuid');
+const connectToDB = require('../config/db');
 
 // GET all bookings
-router.get('/api/bookings', (req, res) => {
+router.get('/bookings', async (req, res) => {
   try {
-    const bookings = JSON.parse(fs.readFileSync(bookingsPath, 'utf-8'));
+    const db = await connectToDB();
+    const bookings = await db.collection('bookings').find().toArray();
     res.json(bookings);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to load bookings' });
+    console.error('Failed to fetch bookings:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
-// POST new booking
-router.post('/api/bookings', (req, res) => {
+// POST a new booking
+router.post('/bookings', async (req, res) => {
   const newBooking = {
     id: uuidv4(),
-    ...req.body,
-    createdAt: new Date().toISOString()
+    villaId: req.body.villaId,
+    checkin: req.body.checkin,
+    checkout: req.body.checkout,
+    name: req.body.name || '',
+    email: req.body.email || '',
+    guests: req.body.guests || '',
+    requests: req.body.requests || '',
+    createdAt: new Date()
   };
 
   try {
-    const bookings = JSON.parse(fs.readFileSync(bookingsPath, 'utf-8'));
-    bookings.push(newBooking);
-    fs.writeFileSync(bookingsPath, JSON.stringify(bookings, null, 2));
-    res.status(201).json({ message: 'Booking successful', booking: newBooking });
+    const db = await connectToDB();
+    await db.collection('bookings').insertOne(newBooking);
+    res.status(201).json({ message: 'Booking added successfully', booking: newBooking });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to save booking' });
-  }
-});
-
-// DELETE booking
-router.delete('/api/bookings/:id', (req, res) => {
-  const { id } = req.params;
-  try {
-    let bookings = JSON.parse(fs.readFileSync(bookingsPath, 'utf-8'));
-    bookings = bookings.filter(b => b.id !== id);
-    fs.writeFileSync(bookingsPath, JSON.stringify(bookings, null, 2));
-    res.json({ message: 'Booking deleted' });
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to delete booking' });
+    console.error('Failed to add booking:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
