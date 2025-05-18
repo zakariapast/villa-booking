@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Villa Booking</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .hero {
+      background: url('/public/uploads/hero.jpg') no-repeat center center;
+      background-size: cover;
+      height: 50vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.8);
+    }
+    .villa-card img {
+      height: 200px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-light bg-light shadow-sm">
+    <div class="container">
+      <a class="navbar-brand" href="/">🌴 Villa Booking</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="text-center">
+      <h1 class="display-4 fw-bold">Find Your Perfect Getaway</h1>
+      <p class="lead">Discover handpicked villas across Bali</p>
+    </div>
+  </section>
+
+  <main class="container my-5">
+    <h2 class="text-center mb-4">Explore Our Villas</h2>
+    <div class="row" id="villaList"></div>
+  </main>
+
+  <footer class="bg-dark text-white text-center py-3">
+    <small>&copy; 2025 Villa Booking. All rights reserved.</small>
+  </footer>
+
+  <script>
+    async function fetchVillas() {
+      const response = await fetch('/api/villas');
+      const villas = await response.json();
+      const listContainer = document.getElementById('villaList');
+      villas.filter(v => v.visible).forEach(villa => {
+        const col = document.createElement('div');
+        col.className = 'col-md-4 mb-4';
+        col.innerHTML = `
+          <div class="card shadow-sm villa-card">
+            <img src="/uploads/${villa.image}" class="card-img-top" alt="${villa.name}">
+            <div class="card-body">
+              <h5 class="card-title">🏡 ${villa.name}</h5>
+              <p class="text-muted mb-1">📍 ${villa.location}</p>
+              <p class="card-text">${villa.description.slice(0, 100)}...</p>
+              <a href="/villas/${villa.id}" class="btn btn-outline-primary w-100">View Details</a>
+            </div>
+          </div>
+        `;
+        listContainer.appendChild(col);
+      });
+    }
+
+    fetchVillas();
+  </script>
+</body>
+</html>
