@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Villa Detail</title>
+  <link rel="stylesheet" href="/public/css/style.css" />
+    <script defer src="/js/villa-detail.js"></script>
+
+</head>
+<body>
+  <header class="navbar">
+    <div class="logo">🌴 Villa Booking</div>
+    <a href="/" class="back-button">← Back to Villas</a>
+  </header>
+
+  <main class="villa-detail-container">
+    <section class="villa-header">
+      <img id="villaImage" alt="Villa Image" class="villa-image" />
+      <div class="villa-header-text">
+        <h1 id="villaName"></h1>
+        <p id="villaLocation" class="location"></p>
+        <p id="villaDescription" class="description"></p>
+      </div>
+    </section>
+
+    <section id="mapSection" class="map-section">
+      <h2>Location Map</h2>
+      <iframe
+        id="villaMap"
+        width="100%"
+        height="300"
+        style="border:0"
+        loading="lazy"
+        allowfullscreen
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </section>
+
+    <section class="room-list">
+      <h2>Available Rooms</h2>
+      <div id="roomsContainer" class="rooms-container"></div>
+    </section>
+
+    <section class="booking-section">
+      <h2>Book This Villa</h2>
+      <form id="bookingForm">
+        <label for="checkin">Check-in Date</label>
+        <input type="date" id="checkin" name="checkin" required />
+
+        <label for="checkout">Check-out Date</label>
+        <input type="date" id="checkout" name="checkout" required />
+
+        <button type="submit">Book Now</button>
+      </form>
+    </section>
+  </main>
+</body>
+</html>
