@@ -1,31 +1,43 @@
-// routes/villas.js (MongoDB version)
-
+// routes/villas.js
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const connectToDB = require('../config/db');
 
-// GET all villas
-router.get('/villas', async (req, res) => {
-  try {
-    const db = await connectToDB();
-    const villas = await db.collection('villas').find().toArray();
-    res.json(villas);
-  } catch (err) {
-    console.error('Failed to fetch villas:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+// Configure multer for image upload
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../public/uploads'));
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '-');
+    cb(null, uniqueName);
   }
 });
 
-// GET single villa by ID
-router.get('/villas/:id', async (req, res) => {
+const upload = multer({ storage });
+
+// POST /api/villas
+router.post('/', upload.single('image'), async (req, res) => {
   try {
     const db = await connectToDB();
-    const villa = await db.collection('villas').findOne({ id: req.params.id });
-    if (!villa) return res.status(404).json({ error: 'Villa not found' });
-    res.json(villa);
+    const { name, location, map, description } = req.body;
+
+    const newVilla = {
+      name,
+      location,
+      map,
+      description,
+      image: req.file ? req.file.filename : null,
+      createdAt: new Date()
+    };
+
+    await db.collection('villas').insertOne(newVilla);
+    res.status(200).send('✅ Villa added successfully');
   } catch (err) {
-    console.error('Error getting villa by ID:', err);
-    res.status(500).json({ error: 'Internal Server Error' });
+    console.error('Error saving villa:', err);
+    res.status(500).send('❌ Failed to save villa');
   }
 });
 
