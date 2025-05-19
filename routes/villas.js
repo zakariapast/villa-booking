@@ -9,6 +9,25 @@ const path = require('path');
 
 const upload = multer({ dest: 'uploads/' });
 
+// Ensure the uploads directory exists
+const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir); // Save to public/uploads
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const filename = Date.now().toString(16) + ext;
+    cb(null, filename);
+  },
+});
+
+const upload = multer({ storage });
+
 // GET all villas
 router.get('/', async (req, res) => {
   const db = await connectToDB();
