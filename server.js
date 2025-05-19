@@ -68,19 +68,19 @@ app.get('/admin/logout', (req, res) => {
   });
 });
 
-// Mount API routes
+// Mount API routes with proper prefixes
 const villasRouter = require('./routes/villas');
 const roomsRouter = require('./routes/rooms');
 const bookingsRouter = require('./routes/bookings');
 const authRouter = require('./routes/auth');
-// devroutes
 const devRoutes = require('./routes/dev');
-app.use('/dev', devRoutes);
 
-app.use('/api', villasRouter);
-app.use('/api', roomsRouter);
-app.use('/api', bookingsRouter);
-app.use(authRouter);
+app.use('/api/villas', villasRouter);
+app.use('/api/rooms', roomsRouter);
+app.use('/api/bookings', bookingsRouter);
+app.use('/dev', devRoutes);
+app.use(authRouter); // already includes /admin prefix inside
+
 
 // Start server
 app.listen(PORT, () => {
