@@ -42,16 +42,18 @@ router.get('/', async (req, res) => {
 // POST new villa
 router.post('/', upload.single('image'), async (req, res) => {
   try {
-    const db = await connectToDB();
+    const filename = req.file ? req.file.filename : null;
+    const imagePath = filename ? `/uploads/${filename}` : null;
+
     const villa = {
       name: req.body.name,
       location: req.body.location,
       map: req.body.map,
       description: req.body.description,
+      image: imagePath,
       visible: req.body.visible === 'true',
-      image: ''
     };
-
+    const db = await connectToDB();
     if (req.file) {
       const ext = path.extname(req.file.originalname);
       const newPath = `uploads/${req.file.filename}${ext}`;
