@@ -58,13 +58,27 @@
       });
     }
 
-    async function deleteVilla(id) {
-      if (!confirm('Delete this villa?')) return;
-      await fetch(`/api/villas/${id}`, { method: 'DELETE' });
+async function deleteVilla(id) {
+  if (!confirm('Delete this villa?')) return;
+
+  try {
+    const res = await fetch(`/api/villas/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) {
+      const msg = await res.text();
+      alert(`Failed to delete villa: ${msg}`);
+    } else {
+      alert('Villa deleted.');
       loadVillas();
     }
+  } catch (err) {
+    console.error('Delete error:', err);
+    alert('Error deleting villa.');
+  }
+}
 
-    loadVillas();
   </script>
 </body>
 </html>
