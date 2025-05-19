@@ -7,10 +7,6 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// devroutes
-const devRoutes = require('./routes/dev');
-app.use('/dev', devRoutes);
-
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -77,6 +73,9 @@ const villasRouter = require('./routes/villas');
 const roomsRouter = require('./routes/rooms');
 const bookingsRouter = require('./routes/bookings');
 const authRouter = require('./routes/auth');
+// devroutes
+const devRoutes = require('./routes/dev');
+app.use('/dev', devRoutes);
 
 app.use('/api', villasRouter);
 app.use('/api', roomsRouter);
