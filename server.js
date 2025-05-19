@@ -16,8 +16,6 @@ app.use(session({ secret: 'villa-secret', resave: false, saveUninitialized: true
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(express.static(path.join(__dirname, 'views')));
-app.use(express.static(path.join(__dirname, 'public')));
-
 
 // View Routes
 app.get('/', (req, res) => {
@@ -70,7 +68,7 @@ app.get('/admin/logout', (req, res) => {
   });
 });
 
-// Mount API routes with proper prefixes
+// Mount API routes
 const villasRouter = require('./routes/villas');
 const roomsRouter = require('./routes/rooms');
 const bookingsRouter = require('./routes/bookings');
@@ -82,7 +80,6 @@ app.use('/api/rooms', roomsRouter);
 app.use('/api/bookings', bookingsRouter);
 app.use('/dev', devRoutes);
 app.use(authRouter); // already includes /admin prefix inside
-
 
 // Start server
 app.listen(PORT, () => {
