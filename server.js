@@ -16,6 +16,8 @@ app.use(session({ secret: 'villa-secret', resave: false, saveUninitialized: true
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 app.use(express.static(path.join(__dirname, 'views')));
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // View Routes
 app.get('/', (req, res) => {
