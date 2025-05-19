@@ -1,19 +1,24 @@
 // config/db.js
 
 const { MongoClient } = require('mongodb');
-require('dotenv').config();
-
 const uri = process.env.MONGO_URI;
-const client = new MongoClient(uri);
 
-let db;
+let cachedClient;
 
 async function connectToDB() {
-  if (!db) {
-    await client.connect();
-    db = client.db('villa_booking'); // You can name your DB anything
-  }
-  return db;
+  if (cachedClient) return cachedClient;
+
+  const client = new MongoClient(uri, {
+    tls: true,                            // ✅ Required for MongoDB Atlas
+    tlsAllowInvalidCertificates: false,  // ✅ Ensure secure connection
+    retryWrites: true,
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+
+  await client.connect();
+  cachedClient = client.db(); // use default DB from URI (/villa_booking)
+  return cachedClient;
 }
 
 module.exports = connectToDB;
