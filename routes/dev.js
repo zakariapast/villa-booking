@@ -1,17 +1,17 @@
-// routes/dev.js (temporary route)
 const express = require('express');
 const router = express.Router();
-const User = require('../models/User');
+const connectToDB = require('../config/db');
 const bcrypt = require('bcrypt');
 
 router.post('/create-admin', async (req, res) => {
-  const hashedPassword = await bcrypt.hash('$2a$12$X6ErxpyNQCDKR.5onLWdx.b6PU600NaQmw7XP9dnaBdBtn4ZhQNNG', 10);
-  await User.create({
+  const db = await connectToDB();
+  const hashedPassword = await bcrypt.hash('admin123', 12); // plain password
+  await db.collection('users').insertOne({
     username: 'admin',
     password: hashedPassword,
     role: 'admin'
   });
-  res.send('Admin created');
+  res.send('✅ Admin created with hashed password');
 });
 
 module.exports = router;
