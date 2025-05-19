@@ -48,4 +48,23 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
+// Delete villa
+router.delete('/villas/:id', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const id = req.params.id;
+    const result = await db.collection('villas').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).send('Villa not found');
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('Delete error:', err);
+    res.status(500).send('Server error');
+  }
+});
+
+
 module.exports = router;
