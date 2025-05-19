@@ -1,39 +1,40 @@
-// routes/auth.js (MongoDB version with session-based login)
+// routes/auth.js (updated with bcrypt password checking)
 
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const connectToDB = require('../config/db');
-
-// Hardcoded fallback admin if DB is empty
-const defaultAdmin = {
-  username: 'admin',
-  password: 'admin123' // Ideally hashed and secured
-};
 
 // Login route
 router.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
   try {
     const db = await connectToDB();
-    const user = await db.collection('admins').findOne({ username });
+    const user = await db.collection('users').findOne({ username });
 
-    // Check DB or fallback to default admin
-    if ((user && user.password === password) ||
-        (username === defaultAdmin.username && password === defaultAdmin.password)) {
-      req.session.user = { username };
-      res.redirect('/admin/dashboard');
-    } else {
-      res.send('Invalid username or password');
+    if (!user) {
+      return res.status(401).send('Invalid username or password');
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).send('Invalid username or password');
+    }
+
+    // Set session
+    req.session.user = { username: user.username, role: user.role };
+    res.redirect('/admin/dashboard');
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).send('Internal Server Error');
   }
 });
 
-// Middleware to protect admin routes
+// Protect all /admin routes except /login
 router.use('/admin', (req, res, next) => {
-  if (!req.session.user) return res.redirect('/admin/login');
+  if (!req.session.user) {
+    return res.redirect('/admin/login');
+  }
   next();
 });
 
