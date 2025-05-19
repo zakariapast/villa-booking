@@ -2,42 +2,49 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
 const connectToDB = require('../config/db');
+const { ObjectId } = require('mongodb');
+const fs = require('fs');
+const path = require('path');
 
-// Configure multer for image upload
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../public/uploads'));
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = Date.now() + '-' + file.originalname.replace(/\s+/g, '-');
-    cb(null, uniqueName);
-  }
+const upload = multer({ dest: 'uploads/' });
+
+// GET all villas
+router.get('/', async (req, res) => {
+  const db = await connectToDB();
+  const villas = await db.collection('villas').find().toArray();
+  res.json(villas.map(v => ({
+    ...v,
+    id: v._id.toString(),
+    image: v.image || '',
+  })));
 });
 
-const upload = multer({ storage });
-
-// POST /api/villas
+// POST new villa
 router.post('/', upload.single('image'), async (req, res) => {
   try {
     const db = await connectToDB();
-    const { name, location, map, description } = req.body;
-
-    const newVilla = {
-      name,
-      location,
-      map,
-      description,
-      image: req.file ? req.file.filename : null,
-      createdAt: new Date()
+    const villa = {
+      name: req.body.name,
+      location: req.body.location,
+      map: req.body.map,
+      description: req.body.description,
+      visible: req.body.visible === 'true',
+      image: ''
     };
 
-    await db.collection('villas').insertOne(newVilla);
-    res.status(200).send('✅ Villa added successfully');
+    if (req.file) {
+      const ext = path.extname(req.file.originalname);
+      const newPath = `uploads/${req.file.filename}${ext}`;
+      fs.renameSync(req.file.path, newPath);
+      villa.image = '/' + newPath;
+    }
+
+    await db.collection('villas').insertOne(villa);
+    res.status(201).send('Villa created');
   } catch (err) {
     console.error('Error saving villa:', err);
-    res.status(500).send('❌ Failed to save villa');
+    res.status(500).send('Failed to create villa');
   }
 });
 
