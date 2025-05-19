@@ -7,13 +7,13 @@ const { ObjectId } = require('mongodb');
 const fs = require('fs');
 const path = require('path');
 
-// Ensure uploads directory exists
+// Ensure the uploads directory exists
 const uploadDir = path.join(__dirname, '..', 'public', 'uploads');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Configure multer storage to save into public/uploads
+// Setup Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -24,7 +24,8 @@ const storage = multer.diskStorage({
     cb(null, filename);
   },
 });
-const upload = multer({ storage }); // ✅ Only this one is needed
+
+const upload = multer({ storage });
 
 // GET all villas
 router.get('/', async (req, res) => {
@@ -37,7 +38,7 @@ router.get('/', async (req, res) => {
       image: v.image || '',
     })));
   } catch (err) {
-    console.error('Fetch villas error:', err);
+    console.error('Error fetching villas:', err);
     res.status(500).send('Failed to fetch villas');
   }
 });
@@ -66,11 +67,12 @@ router.post('/', upload.single('image'), async (req, res) => {
   }
 });
 
-// DELETE a villa
+// DELETE villa
 router.delete('/villas/:id', async (req, res) => {
   try {
     const db = await connectToDB();
-    const result = await db.collection('villas').deleteOne({ _id: new ObjectId(req.params.id) });
+    const id = req.params.id;
+    const result = await db.collection('villas').deleteOne({ _id: new ObjectId(id) });
 
     if (result.deletedCount === 0) {
       return res.status(404).send('Villa not found');
