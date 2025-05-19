@@ -1,0 +1,76 @@
+/* Base Reset Enhancements */
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #212529;
+}
+
+/* Top Navigation */
+.topbar {
+  background: #fff;
+  border-bottom: 1px solid #dee2e6;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Headings */
+h1, h2, h3, h4 {
+  font-weight: 600;
+}
+
+/* Card Styling */
+.villa-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  transition: box-shadow 0.2s ease;
+}
+.villa-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.villa-card img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+/* Buttons */
+.btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Forms */
+.form-control {
+  border-radius: 0.375rem;
+}
+.form-label {
+  font-weight: 500;
+}
+
+/* Preview Images */
+.img-preview {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-top: 1rem;
+  border: 1px dashed #ccc;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+/* Visibility Toggle */
+.btn-outline-success,
+.btn-outline-secondary {
+  margin-top: 0.5rem;
+}
+
+/* Modals */
+.modal-title {
+  font-weight: 600;
+}
+
