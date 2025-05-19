@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 
 router.get('/create-admin', async (req, res) => {
   const db = await connectToDB();
-  const hashedPassword = await bcrypt.hash('admin123', 12); // plain password
+  const hashedPassword = '$2b$12$D5twS7aX1oCDPN5AXjAKXOxt2YtzHhYgOEceBZ4xKh1TxvmwlGON6'; // bcrypt hash of admin123
   await db.collection('users').insertOne({
     username: 'admin',
     password: hashedPassword,
