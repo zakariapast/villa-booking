@@ -62,6 +62,14 @@
       border-radius: 12px;
       border: 1px solid #ddd;
     }
+    .booking-form {
+      margin-top: 60px;
+      padding: 30px;
+      background: white;
+      border: 1px solid #DEE2E6;
+      border-radius: 16px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
@@ -88,6 +96,39 @@
       <h4 class="mt-5">Available Rooms</h4>
       <div id="roomList"></div>
     </div>
+
+    <div class="booking-form mt-5">
+      <h4 class="mb-4">Booking Form</h4>
+      <form id="bookingForm">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" required>
+          </div>
+          <div class="col-md-6">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" required>
+          </div>
+          <div class="col-md-6">
+            <label for="checkin" class="form-label">Check-In Date</label>
+            <input type="date" class="form-control" id="checkin" required>
+          </div>
+          <div class="col-md-6">
+            <label for="checkout" class="form-label">Check-Out Date</label>
+            <input type="date" class="form-control" id="checkout" required>
+          </div>
+          <div class="col-md-12">
+            <label for="guests" class="form-label">Number of Guests</label>
+            <input type="number" class="form-control" id="guests" required min="1">
+          </div>
+          <div class="col-md-12">
+            <label for="requests" class="form-label">Special Requests (optional)</label>
+            <textarea id="requests" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-4 w-100">Submit Booking</button>
+      </form>
+    </div>
   </div>
 
   <script>
@@ -107,7 +148,7 @@
       if (villa.map) {
         document.getElementById('villaMapContainer').style.display = 'block';
         document.getElementById('villaMap').innerHTML = `
-          <iframe src="${villa.map}" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+          <iframe src="${villa.map}" width="100%" height="300" style="border:0;" allowfullscreen loading="lazy"></iframe>
         `;
       }
     }
@@ -131,6 +172,31 @@
         list.appendChild(div);
       });
     }
+
+    document.getElementById('bookingForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const data = {
+        villaId,
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        checkin: document.getElementById('checkin').value,
+        checkout: document.getElementById('checkout').value,
+        guests: document.getElementById('guests').value,
+        requests: document.getElementById('requests').value
+      };
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (res.ok) {
+        alert('✅ Booking submitted!');
+        document.getElementById('bookingForm').reset();
+      } else {
+        alert('❌ Failed to submit booking');
+      }
+    });
 
     loadVillaDetails();
     loadRooms();
