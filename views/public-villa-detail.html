@@ -5,129 +5,67 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Villa Details</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #F8F9FA;
-      color: #2C3E50;
-    }
-    .villa-hero {
-      background: #3CB371;
-      color: white;
-      padding: 60px 20px;
-      text-align: center;
-    }
-    .villa-details {
-      animation: fadeIn 0.8s ease-out;
-    }
-    .villa-img {
-      width: 100%;
-      max-height: 400px;
-      object-fit: cover;
-      border-radius: 16px;
-    }
-    .back-btn {
-      margin-top: 20px;
-      display: inline-block;
-      color: #2E8B57;
-      text-decoration: none;
-      font-weight: 500;
-    }
-    .back-btn:hover {
-      text-decoration: underline;
-    }
-    .room-card {
-      border: 1px solid #DEE2E6;
-      border-radius: 8px;
-      padding: 15px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      background-color: white;
-    }
-    .book-btn {
-      background-color: #2E8B57;
-      color: white;
-      border: none;
-    }
-    .book-btn:hover {
-      background-color: #246B45;
-    }
-    iframe {
-      border-radius: 12px;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    body { background-color: #fefefe; font-family: 'Segoe UI', sans-serif; }
+    .hero-img { max-height: 400px; object-fit: cover; width: 100%; border-radius: 8px; }
+    .room-card { border: 1px solid #eee; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: 0.3s ease; }
+    .room-card:hover { transform: translateY(-4px); }
+    .room-img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 0.5rem; }
+    .back-btn { text-decoration: none; color: #555; margin-bottom: 1rem; display: inline-block; }
+    iframe { width: 100%; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <div class="villa-hero">
-    <h1 id="villaName">Villa Name</h1>
-    <p id="villaLocation">Location</p>
-    <a href="/" class="back-btn">&larr; Back to Home</a>
-  </div>
-
-  <div class="container villa-details py-5">
-    <img id="villaImage" src="" alt="Villa Image" class="villa-img mb-4">
-    <p id="villaDescription"></p>
-
-    <div class="my-4">
-      <h4>Map Location</h4>
-      <div id="villaMap"></div>
-    </div>
-
-    <div id="roomsSection" style="display:none">
-      <h4 class="mt-5">Available Rooms</h4>
-      <div id="roomList"></div>
-    </div>
+  <div class="container py-4">
+    <a href="/" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Villas</a>
+    <div id="villaDetail"></div>
+    <div id="roomList" class="row mt-4"></div>
   </div>
 
   <script>
-    const villaId = window.location.pathname.split('/').pop();
-
-    async function loadVillaDetails() {
+    async function loadVillaDetail() {
+      const id = window.location.pathname.split('/').pop();
       const villaRes = await fetch('/api/villas');
+      const roomRes = await fetch('/api/rooms');
       const villas = await villaRes.json();
-      const villa = villas.find(v => v.id === villaId);
-      if (!villa) return;
+      const rooms = await roomRes.json();
+      const villa = villas.find(v => v.id === id);
+      if (!villa) return document.getElementById('villaDetail').innerHTML = '<p>Villa not found.</p>';
 
-      document.getElementById('villaName').textContent = villa.name;
-      document.getElementById('villaLocation').textContent = `📍 ${villa.location}`;
-      document.getElementById('villaImage').src = villa.image;
-      document.getElementById('villaDescription').textContent = villa.description;
+      const detail = `
+        <h2 class="mb-3">${villa.name}</h2>
+        <img src="${villa.image}" alt="${villa.name}" class="hero-img mb-3">
+        <p class="text-muted">${villa.location}</p>
+        <p>${villa.description}</p>
+        ${villa.map ? `<div class="mt-4"><h5>Location Map</h5><iframe src="${villa.map}" height="300" allowfullscreen loading="lazy"></iframe></div>` : ''}
+      `;
+      document.getElementById('villaDetail').innerHTML = detail;
 
-      if (villa.map) {
-        document.getElementById('villaMap').innerHTML = `
-          <iframe src="${villa.map}" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-        `;
+      const filteredRooms = rooms.filter(r => r.villaId === id);
+      const roomList = document.getElementById('roomList');
+
+      if (filteredRooms.length > 0) {
+        roomList.innerHTML = '<h4 class="mb-3">Available Rooms</h4>';
+        filteredRooms.forEach(room => {
+          const div = document.createElement('div');
+          div.className = 'col-md-4';
+          div.innerHTML = `
+            <div class="room-card">
+              <img src="${room.image || '/public/images/default-room.jpg'}" alt="${room.name}" class="room-img">
+              <h5>${room.name}</h5>
+              <p>${room.description}</p>
+              <p class="fw-semibold">Rp ${Number(room.price).toLocaleString()} / night</p>
+              <button class="btn btn-outline-primary w-100" disabled>Book Now</button>
+            </div>
+          `;
+          roomList.appendChild(div);
+        });
       }
     }
 
-    async function loadRooms() {
-      const res = await fetch('/api/rooms');
-      const rooms = await res.json();
-      const filtered = rooms.filter(r => r.villaId === villaId);
-      if (filtered.length === 0) return;
-      document.getElementById('roomsSection').style.display = 'block';
-      const list = document.getElementById('roomList');
-      filtered.forEach(room => {
-        const div = document.createElement('div');
-        div.className = 'room-card';
-        div.innerHTML = `
-          <h5>${room.name}</h5>
-          <p>${room.description}</p>
-          <p><strong>Price:</strong> Rp ${room.price?.toLocaleString()}</p>
-          <button class="btn book-btn">Book Now</button>
-        `;
-        list.appendChild(div);
-      });
-    }
-
-    loadVillaDetails();
-    loadRooms();
+    loadVillaDetail();
   </script>
 </body>
 </html>
