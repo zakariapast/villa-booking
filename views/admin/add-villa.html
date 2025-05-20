@@ -4,110 +4,90 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add Villa</title>
-  <link rel="stylesheet" href="/public/css/admin.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.css">
+  <title>Add New Villa</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .container {
+      max-width: 700px;
+      padding-top: 40px;
+    }
+    .form-label {
+      font-weight: 500;
+    }
+    .img-preview {
+      max-height: 200px;
+      margin-top: 10px;
+      border-radius: 6px;
+    }
+    .error-message {
+      color: red;
+      font-size: 0.9rem;
+      display: none;
+    }
+  </style>
 </head>
-<body class="container py-5">
-  <h2 class="mb-4">Add New Villa</h2>
-  <form id="villaForm">
-    <div class="mb-3">
-      <label for="name" class="form-label">Villa Name</label>
-      <input type="text" class="form-control" id="name" required>
-    </div>
-    <div class="mb-3">
-      <label for="location" class="form-label">Location</label>
-      <input type="text" class="form-control" id="location" required>
-    </div>
-    <div class="mb-3">
-      <label for="map" class="form-label">Google Maps Link</label>
-      <input type="url" class="form-control" id="map">
-    </div>
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea class="form-control" id="description" rows="4" required></textarea>
-    </div>
-    <div class="mb-3">
-      <label for="imageInput" class="form-label">Upload Image</label>
-      <input type="file" class="form-control" id="imageInput" accept="image/*">
-      <small class="text-muted">Recommended: 1200x800px, max 1MB</small>
-      <canvas id="croppedCanvas" class="d-block mt-3" style="display: none; max-width: 100%;"></canvas>
-      <button type="button" id="discardImage" class="btn btn-sm btn-outline-danger mt-2" style="display: none;">Discard Image</button>
-    </div>
-    <div class="form-check mb-3">
-      <input class="form-check-input" type="checkbox" id="visible">
-      <label class="form-check-label" for="visible">Visible to Public</label>
-    </div>
-    <button type="submit" class="btn btn-primary">Save Villa</button>
-  </form>
-
-  <!-- Modal -->
-  <div class="modal fade" id="cropperModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Crop Image</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <img id="cropperImage" style="max-width: 100%;">
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" id="cropSaveBtn">Save Cropped</button>
-        </div>
+<body>
+  <div class="container">
+    <h2 class="mb-4 text-center">Add New Villa</h2>
+    <form id="villaForm">
+      <div class="mb-3">
+        <label for="name" class="form-label">Villa Name</label>
+        <input type="text" class="form-control" id="name" required>
       </div>
-    </div>
+      <div class="mb-3">
+        <label for="location" class="form-label">Location</label>
+        <input type="text" class="form-control" id="location" required>
+      </div>
+      <div class="mb-3">
+        <label for="map" class="form-label">Google Maps Embed Link</label>
+        <input type="url" class="form-control" id="map">
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <textarea class="form-control" id="description" rows="4" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="image" class="form-label">Upload Image</label>
+        <input class="form-control" type="file" id="image" accept="image/*">
+        <div class="form-text">Recommended: 1200x800px, max 1MB</div>
+        <img id="preview" class="img-preview" style="display:none;" />
+        <div id="imageError" class="error-message">Image must be less than 1MB.</div>
+      </div>
+      <div class="form-check form-switch mb-3">
+        <input class="form-check-input" type="checkbox" id="visible">
+        <label class="form-check-label" for="visible">Visible to Public</label>
+      </div>
+      <button type="submit" class="btn btn-success w-100">Save Villa</button>
+    </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.5.13/dist/cropper.min.js"></script>
   <script>
-    let cropper, croppedBlob = null;
-    const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+    const imageInput = document.getElementById('image');
+    const preview = document.getElementById('preview');
+    const imageError = document.getElementById('imageError');
 
-    document.getElementById('imageInput').addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => {
-        document.getElementById('cropperImage').src = reader.result;
-        cropperModal.show();
-      };
-      reader.readAsDataURL(file);
+    imageInput.addEventListener('change', () => {
+      const file = imageInput.files[0];
+      if (file && file.size > 1 * 1024 * 1024) {
+        imageError.style.display = 'block';
+        imageInput.value = '';
+        preview.style.display = 'none';
+      } else if (file) {
+        imageError.style.display = 'none';
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
     });
 
-    document.getElementById('cropperModal').addEventListener('shown.bs.modal', () => {
-      if (cropper) cropper.destroy();
-      cropper = new Cropper(document.getElementById('cropperImage'), {
-        aspectRatio: 3 / 2,
-        viewMode: 1
-      });
-    });
-
-    document.getElementById('cropSaveBtn').addEventListener('click', () => {
-      const canvas = cropper.getCroppedCanvas({ width: 1200, height: 800 });
-      canvas.toBlob(blob => {
-        croppedBlob = blob;
-        const ctx = document.getElementById('croppedCanvas').getContext('2d');
-        document.getElementById('croppedCanvas').width = canvas.width;
-        document.getElementById('croppedCanvas').height = canvas.height;
-        ctx.drawImage(canvas, 0, 0);
-        document.getElementById('croppedCanvas').style.display = 'block';
-        document.getElementById('discardImage').style.display = 'inline-block';
-        cropperModal.hide();
-      }, 'image/jpeg');
-    });
-
-    document.getElementById('discardImage').addEventListener('click', () => {
-      croppedBlob = null;
-      document.getElementById('imageInput').value = '';
-      document.getElementById('croppedCanvas').style.display = 'none';
-      document.getElementById('discardImage').style.display = 'none';
-    });
-
-    document.getElementById('villaForm').addEventListener('submit', async (e) => {
+    document.getElementById('villaForm').addEventListener('submit', async e => {
       e.preventDefault();
       const formData = new FormData();
       formData.append('name', document.getElementById('name').value);
@@ -115,9 +95,8 @@
       formData.append('map', document.getElementById('map').value);
       formData.append('description', document.getElementById('description').value);
       formData.append('visible', document.getElementById('visible').checked);
-      if (croppedBlob) {
-        formData.append('image', croppedBlob, 'cropped.jpg');
-      }
+      const image = imageInput.files[0];
+      if (image) formData.append('image', image);
 
       const res = await fetch('/api/villas', {
         method: 'POST',
@@ -125,10 +104,9 @@
       });
 
       if (res.ok) {
-        alert('✅ Villa added!');
         window.location.href = '/admin/villas/list';
       } else {
-        alert('❌ Failed to add villa.');
+        alert('Failed to save villa.');
       }
     });
   </script>
