@@ -9,46 +9,101 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body { background-color: #fefefe; font-family: 'Segoe UI', sans-serif; }
-    .hero { background: url('/public/images/villa-banner.jpg') center/cover no-repeat; height: 300px; display: flex; align-items: center; justify-content: center; color: white; text-shadow: 0 2px 6px rgba(0,0,0,0.6); font-size: 2rem; font-weight: bold; }
-    .villa-card { border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; transition: all 0.3s; }
-    .villa-card:hover { transform: translateY(-5px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .villa-img { height: 220px; object-fit: cover; width: 100%; }
-    .villa-body { padding: 1rem; }
-    .villa-body h5 { font-weight: 600; }
-    .villa-body p { margin-bottom: 0.5rem; color: #555; }
-    .btn-view { margin-top: 0.5rem; }
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)), url('/public/images/villa-banner.jpg') center/cover no-repeat;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+      font-size: 2.2rem;
+      font-weight: bold;
+    }
+    .villa-card {
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow: hidden;
+      transition: all 0.3s;
+      background: #fff;
+    }
+    .villa-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .villa-img {
+      height: 220px;
+      object-fit: cover;
+      width: 100%;
+    }
+    .villa-body {
+      padding: 1rem;
+    }
+    .villa-body h5 {
+      font-weight: 600;
+      color: #333;
+    }
+    .villa-body p {
+      margin-bottom: 0.5rem;
+      color: #666;
+    }
+    .btn-view {
+      margin-top: 0.5rem;
+    }
+    .no-villas {
+      text-align: center;
+      padding: 2rem;
+      color: #888;
+    }
   </style>
 </head>
 <body>
-  <div class="hero">Explore Our Villas</div>
+  <div class="hero">Explore Our Beautiful Villas</div>
   <div class="container py-5">
     <div class="row" id="villaList"></div>
+    <div id="noDataMsg" class="no-villas" style="display: none;">No villas are available at the moment.</div>
   </div>
 
   <script>
     async function loadVillas() {
-      const res = await fetch('/api/villas');
-      const villas = await res.json();
-      const container = document.getElementById('villaList');
+      try {
+        const res = await fetch('/api/villas');
+        const villas = await res.json();
+        const container = document.getElementById('villaList');
+        const noData = document.getElementById('noDataMsg');
 
-      villas.filter(v => v.visible).forEach(villa => {
-        const col = document.createElement('div');
-        col.className = 'col-md-4 mb-4';
-        col.innerHTML = `
-          <div class="villa-card">
-            <img src="${villa.image}" alt="${villa.name}" class="villa-img">
-            <div class="villa-body">
-              <h5>${villa.name}</h5>
-              <p class="text-muted">${villa.location}</p>
-              <p>${villa.description.slice(0, 100)}...</p>
-              <a href="/villas/${villa.id}" class="btn btn-outline-primary btn-sm btn-view">
-                View Details <i class="fas fa-arrow-right"></i>
-              </a>
+        container.innerHTML = '';
+        const visibleVillas = villas.filter(v => v.visible);
+
+        if (visibleVillas.length === 0) {
+          noData.style.display = 'block';
+          return;
+        } else {
+          noData.style.display = 'none';
+        }
+
+        visibleVillas.forEach(villa => {
+          const col = document.createElement('div');
+          col.className = 'col-md-4 mb-4';
+          col.innerHTML = `
+            <div class="villa-card">
+              <img src="${villa.image}" alt="${villa.name}" class="villa-img">
+              <div class="villa-body">
+                <h5>${villa.name}</h5>
+                <p class="text-muted">${villa.location}</p>
+                <p>${villa.description.slice(0, 100)}...</p>
+                <a href="/villas/${villa.id}" class="btn btn-outline-primary btn-sm btn-view">
+                  View Details <i class="fas fa-arrow-right"></i>
+                </a>
+              </div>
             </div>
-          </div>
-        `;
-        container.appendChild(col);
-      });
+          `;
+          container.appendChild(col);
+        });
+      } catch (error) {
+        console.error('Failed to load villas:', error);
+        document.getElementById('villaList').innerHTML = '<p class="text-danger">Failed to load villas.</p>';
+      }
     }
 
     loadVillas();
