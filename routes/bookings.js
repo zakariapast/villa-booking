@@ -12,20 +12,30 @@ function isOverlapping(start1, end1, start2, end2) {
 router.get('/', async (req, res) => {
   try {
     const db = await connectToDB();
-    const bookings = await db.collection('bookings')
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
 
-    res.json(bookings.map(b => ({
-      ...b,
-      id: b._id.toString()
-    })));
+    const bookings = await db.collection('bookings').find({}).sort({ createdAt: -1 }).toArray();
+    const villas = await db.collection('villas').find({}).toArray();
+    const rooms = await db.collection('rooms').find({}).toArray();
+
+    const enriched = bookings.map(b => {
+      const villa = villas.find(v => v._id.toString() === b.villaId);
+      const room = rooms.find(r => (r.id || r._id?.toString()) === b.roomId);
+      return {
+        ...b,
+        id: b._id.toString(),
+        villaName: villa?.name || b.villaId,
+        roomName: room?.name || b.roomId,
+        guestDetail: b.guestDetail || `${b.guests || 1} guest(s)`
+      };
+    });
+
+    res.json(enriched);
   } catch (err) {
     console.error('Failed to fetch bookings:', err);
     res.status(500).json({ error: 'Failed to fetch bookings' });
   }
 });
+
 
 // POST /api/bookings
 router.post('/', async (req, res) => {
