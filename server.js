@@ -38,6 +38,10 @@ app.get('/admin/dashboard', (req, res) => {
   res.sendFile(path.join(__dirname, 'views/admin/admin-dashboard.html'));
 });
 
+app.get('/admin/bookings', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views/admin/list-bookings.html'));
+});
+
 app.get('/admin/villas/list', (req, res) => {
   res.sendFile(path.join(__dirname, 'views/admin/list-villas.html'));
 });
