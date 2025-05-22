@@ -42,6 +42,28 @@ router.get('/', async (req, res) => {
     res.status(500).send('Failed to fetch villas');
   }
 });
+// GET single villa by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const id = req.params.id;
+
+    const villa = await db.collection('villas').findOne({ _id: new ObjectId(id) });
+
+    if (!villa) {
+      return res.status(404).send('Villa not found');
+    }
+
+    res.json({
+      ...villa,
+      id: villa._id.toString(),
+      image: villa.image || '',
+    });
+  } catch (err) {
+    console.error('Error fetching villa by ID:', err);
+    res.status(500).send('Failed to fetch villa');
+  }
+});
 
 // POST new villa
 router.post('/', upload.single('image'), async (req, res) => {
