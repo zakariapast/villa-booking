@@ -297,7 +297,8 @@
       } else {
         mapContainer.innerHTML = "<p>Map not available</p>";
       }
-
+      // After loading villa data
+      loadRooms(villa.id);
       // Amenities (optional — static now, will connect later)
       // document.getElementById("amenitiesText").textContent = villa.amenities?.join(", ") || "No amenities listed";
 
@@ -306,6 +307,34 @@
       alert("Failed to load villa details");
     }
   }
+async function loadRooms(villaId) {
+  try {
+    const res = await fetch(`/api/rooms?villaId=${villaId}`);
+    const rooms = await res.json();
+    const container = document.getElementById('roomList');
+    container.innerHTML = '';
+
+    if (rooms.length === 0) {
+      container.innerHTML = '<p class="text-muted">No rooms available for this villa.</p>';
+      return;
+    }
+
+    rooms.forEach(room => {
+      const roomCard = document.createElement('div');
+      roomCard.className = 'room-card';
+      roomCard.innerHTML = `
+        <h6>${room.name}</h6>
+        <p>${room.description}</p>
+        <p><strong>Price:</strong> IDR ${Number(room.price).toLocaleString()}</p>
+        <p><strong>Amenities:</strong> ${room.amenities.join(', ')}</p>
+        ${room.image ? `<img src="${room.image}" class="img-fluid rounded mt-2" style="max-height:120px;">` : ''}
+      `;
+      container.appendChild(roomCard);
+    });
+  } catch (err) {
+    console.error("Failed to load rooms:", err);
+  }
+}
 
   function showFullDescription() {
     const el = document.getElementById("villaDescriptionShort");
