@@ -35,6 +35,32 @@ router.get('/', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch bookings' });
   }
 });
+// PATCH /api/bookings/:id/status
+router.patch('/:id/status', async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  if (!['pending', 'confirmed', 'cancelled'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status value' });
+  }
+
+  try {
+    const db = await connectToDB();
+    const result = await db.collection('bookings').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: { status } }
+    );
+
+    if (result.modifiedCount === 1) {
+      return res.json({ message: 'Status updated' });
+    } else {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+  } catch (err) {
+    console.error('Update status error:', err);
+    res.status(500).json({ error: 'Failed to update status' });
+  }
+});
 
 
 // POST /api/bookings
