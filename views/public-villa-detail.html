@@ -307,7 +307,10 @@
       loadRooms(villa.id);
       // Amenities (optional — static now, will connect later)
       // document.getElementById("amenitiesText").textContent = villa.amenities?.join(", ") || "No amenities listed";
-
+      // ✅ Setup price preview events AFTER everything is ready
+      document.getElementById('checkin').addEventListener('change', calculateTotalPrice);
+      document.getElementById('checkout').addEventListener('change', calculateTotalPrice);
+      document.getElementById('roomSelector').addEventListener('change', calculateTotalPrice);
     } catch (err) {
       console.error("Error loading villa:", err);
       alert("Failed to load villa details");
@@ -337,6 +340,16 @@ async function loadRooms(villaId) {
       `;
       container.appendChild(roomCard);
     });
+    const roomSelector = document.getElementById('roomSelector');
+    roomSelector.innerHTML = '<option value="">-- Choose a room --</option>';
+
+    rooms.forEach(room => {
+    const option = document.createElement('option');
+    option.value = room.price;
+    option.textContent = `${room.name} - IDR ${Number(room.price).toLocaleString()}/night`;
+    roomSelector.appendChild(option);
+    });
+
   } catch (err) {
     console.error("Failed to load rooms:", err);
   }
@@ -351,6 +364,22 @@ async function loadRooms(villaId) {
 
   // Call function
   loadVillaDetails();
+    function calculateTotalPrice() {
+  const checkin = document.getElementById('checkin')._flatpickr.selectedDates[0];
+  const checkout = document.getElementById('checkout')._flatpickr.selectedDates[0];
+  const roomPrice = Number(document.getElementById('roomSelector').value);
+
+  if (!checkin || !checkout || !roomPrice) return;
+
+  const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) return;
+
+  const total = nights * roomPrice;
+  document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
+}
+
+
 </script>
+  
 </body>
 </html>
