@@ -160,6 +160,12 @@
           <p id="pricePreview" class="text-muted"></p>
           <form id="bookingForm">
             <div class="mb-3">
+              <label class="form-label">Select Room</label>
+              <select id="roomSelector" class="form-select" required>
+              <option value="">-- Choose a room --</option>
+              </select>
+            </div>
+            <div class="mb-3">
               <label class="form-label">Check-in</label>
               <input type="text" id="checkin" class="form-control" required />
             </div>
