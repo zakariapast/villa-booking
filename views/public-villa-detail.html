@@ -378,6 +378,57 @@ async function loadRooms(villaId) {
   document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
 }
 
+document.getElementById('bookingForm').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const villaName = document.getElementById('villaName').textContent;
+  const room = document.getElementById('roomSelector').selectedOptions[0]?.textContent || "";
+  const roomPrice = document.getElementById('roomSelector').value;
+  const checkin = document.getElementById('checkin').value;
+  const checkout = document.getElementById('checkout').value;
+  const guestSummary = document.getElementById('guestSummary').value;
+  const fullName = document.getElementById('name').value;
+  const email = document.getElementById('email').value;
+  const notes = document.getElementById('notes').value;
+
+  if (!checkin || !checkout || !room) {
+    alert("Please select room and dates");
+    return;
+  }
+
+  const booking = {
+    villaName,
+    room,
+    roomPrice,
+    checkin,
+    checkout,
+    guestSummary,
+    fullName,
+    email,
+    notes,
+    createdAt: new Date()
+  };
+
+  try {
+    const res = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(booking)
+    });
+
+    if (res.ok) {
+      alert("✅ Booking submitted successfully!");
+      document.getElementById('bookingForm').reset();
+      document.getElementById('guestSummary').value = "1 Adult";
+      document.getElementById('pricePreview').textContent = "";
+    } else {
+      alert("❌ Failed to submit booking");
+    }
+  } catch (err) {
+    console.error("Booking error:", err);
+    alert("❌ Booking error");
+  }
+});
 
 </script>
   
