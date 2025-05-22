@@ -8,6 +8,24 @@ const { ObjectId } = require('mongodb');
 function isOverlapping(start1, end1, start2, end2) {
   return (new Date(start1) < new Date(end2)) && (new Date(start2) < new Date(end1));
 }
+// GET /api/bookings
+router.get('/', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const bookings = await db.collection('bookings')
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+
+    res.json(bookings.map(b => ({
+      ...b,
+      id: b._id.toString()
+    })));
+  } catch (err) {
+    console.error('Failed to fetch bookings:', err);
+    res.status(500).json({ error: 'Failed to fetch bookings' });
+  }
+});
 
 // POST /api/bookings
 router.post('/', async (req, res) => {
