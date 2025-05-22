@@ -69,7 +69,11 @@
             <td>${b.email}</td>
             <td>${b.checkin?.slice(0,10)} → ${b.checkout?.slice(0,10)}</td>
             <td>${b.guestDetail || b.guests}</td>
-            <td><span class="status-badge ${b.status}">${b.status}</span></td>
+            <td>
+              <span class="status-badge ${b.status}">${b.status}</span><br/>
+              <button class="btn btn-sm btn-success me-1" onclick="updateStatus('${b.id}', 'confirmed')">Confirm</button>
+              <button class="btn btn-sm btn-danger" onclick="updateStatus('${b.id}', 'cancelled')">Cancel</button>
+            </td>
           `;
           tbody.appendChild(tr);
         });
@@ -77,8 +81,28 @@
         console.error('Failed to load bookings:', err);
       }
     }
-
     loadBookings();
+    async function updateStatus(id, newStatus) {
+  if (!confirm(`Are you sure to set status to ${newStatus}?`)) return;
+
+  try {
+    const res = await fetch(`/api/bookings/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (res.ok) {
+      alert("Status updated");
+      loadBookings();
+    } else {
+      alert("Failed to update status");
+    }
+  } catch (err) {
+    console.error("Status update error:", err);
+    alert("Error occurred");
+  }
+}
   </script>
 </body>
 </html>
