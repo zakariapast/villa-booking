@@ -346,6 +346,7 @@ async function loadRooms(villaId) {
     rooms.forEach(room => {
     const option = document.createElement('option');
     option.value = room.price;
+    option.setAttribute('data-room-id', room.id || room._id || "");
     option.textContent = `${room.name} - IDR ${Number(room.price).toLocaleString()}/night`;
     roomSelector.appendChild(option);
     });
@@ -381,46 +382,47 @@ async function loadRooms(villaId) {
 document.getElementById('bookingForm').addEventListener('submit', async function (e) {
   e.preventDefault();
 
-  const villaName = document.getElementById('villaName').textContent;
-  const room = document.getElementById('roomSelector').selectedOptions[0]?.textContent || "";
-  const roomPrice = document.getElementById('roomSelector').value;
+  const urlParams = new URLSearchParams(window.location.search);
+  const villaId = urlParams.get('id'); // use actual villaId from URL
+
+  const roomId = document.getElementById('roomSelector').selectedOptions[0]?.getAttribute('data-room-id') || null;
   const checkin = document.getElementById('checkin').value;
   const checkout = document.getElementById('checkout').value;
-  const guestSummary = document.getElementById('guestSummary').value;
-  const fullName = document.getElementById('name').value;
+  const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
   const notes = document.getElementById('notes').value;
+  const guests = Object.values(guestData).reduce((a, b) => a + b, 0); // total guests from guestData
 
-  if (!checkin || !checkout || !room) {
-    alert("Please select room and dates");
+  if (!checkin || !checkout || !name || !email || !villaId) {
+    alert("Please fill in all required fields");
     return;
   }
 
-  const booking = {
-    villaName,
-    room,
-    roomPrice,
+  const payload = {
+    villaId,
+    roomId,
     checkin,
     checkout,
-    guestSummary,
-    fullName,
+    name,
     email,
-    notes,
-    createdAt: new Date()
+    guests,
+    notes
   };
 
   try {
     const res = await fetch('/api/bookings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(booking)
+      body: JSON.stringify(payload)
     });
 
-    if (res.ok) {
-      alert("✅ Booking submitted successfully!");
+    if (res.status === 201) {
+      alert("✅ Booking submitted successfully! Awaiting confirmation.");
       document.getElementById('bookingForm').reset();
       document.getElementById('guestSummary').value = "1 Adult";
       document.getElementById('pricePreview').textContent = "";
+    } else if (res.status === 409) {
+      alert("⚠️ Sorry, selected dates are already booked.");
     } else {
       alert("❌ Failed to submit booking");
     }
