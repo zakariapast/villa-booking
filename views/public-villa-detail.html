@@ -259,5 +259,63 @@
       document.getElementById('guestSummary').value = summary;
     }
   </script>
+  <script>
+  async function loadVillaDetails() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const villaId = urlParams.get('id');
+    if (!villaId) return alert("Villa ID not found in URL");
+
+    try {
+      const res = await fetch(`/api/villas/${villaId}`);
+      if (!res.ok) throw new Error("Villa not found");
+      const villa = await res.json();
+
+      // Hero Section
+      document.getElementById("villaName").textContent = villa.name || "Unnamed Villa";
+      document.getElementById("villaLocation").textContent = villa.location || "Unknown";
+
+      // Description
+      const fullDesc = villa.description || "";
+      document.getElementById("villaDescriptionShort").textContent = fullDesc.slice(0, 200) + (fullDesc.length > 200 ? "..." : "");
+
+      // Gallery
+      const gallery = document.getElementById("villaGallery");
+      gallery.innerHTML = "";
+      if (villa.image) {
+        const img = document.createElement("img");
+        img.src = villa.image;
+        img.alt = "Villa Image";
+        gallery.appendChild(img);
+      } else {
+        gallery.innerHTML = "<p>No images available</p>";
+      }
+
+      // Map
+      const mapContainer = document.getElementById("villaMap");
+      if (villa.map) {
+        mapContainer.innerHTML = `<iframe src="${villa.map}" frameborder="0" allowfullscreen></iframe>`;
+      } else {
+        mapContainer.innerHTML = "<p>Map not available</p>";
+      }
+
+      // Amenities (optional — static now, will connect later)
+      // document.getElementById("amenitiesText").textContent = villa.amenities?.join(", ") || "No amenities listed";
+
+    } catch (err) {
+      console.error("Error loading villa:", err);
+      alert("Failed to load villa details");
+    }
+  }
+
+  function showFullDescription() {
+    const el = document.getElementById("villaDescriptionShort");
+    el.style.maxHeight = "none";
+    el.style.overflow = "visible";
+    document.querySelector(".show-more-btn").style.display = "none";
+  }
+
+  // Call function
+  loadVillaDetails();
+</script>
 </body>
 </html>
