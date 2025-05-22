@@ -63,12 +63,12 @@
         data.forEach(b => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${b.villaName || b.villaId}</td>
-            <td>${b.room || b.roomId || '-'}</td>
+            <td>${b.villaName}</td>
+            <td>${b.roomName || '-'}</td>
             <td>${b.name}</td>
             <td>${b.email}</td>
             <td>${b.checkin?.slice(0,10)} → ${b.checkout?.slice(0,10)}</td>
-            <td>${b.guests}</td>
+            <td>${b.guestDetail || b.guests}</td>
             <td><span class="status-badge ${b.status}">${b.status}</span></td>
           `;
           tbody.appendChild(tr);
