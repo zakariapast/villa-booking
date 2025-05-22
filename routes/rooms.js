@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const connectToDB = require('../config/db');
 
 // GET all rooms or filter by villaId
-router.get('/rooms', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const db = await connectToDB();
     const query = req.query.villaId ? { villaId: req.query.villaId } : {};
@@ -19,7 +19,7 @@ router.get('/rooms', async (req, res) => {
 });
 
 // POST a new room
-router.post('/rooms', async (req, res) => {
+router.post('/', async (req, res) => {
   const newRoom = {
     id: uuidv4(),
     villaId: req.body.villaId,
