@@ -83,6 +83,13 @@
 
     bookings.forEach(b => {
       const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      tr.setAttribute('data-bs-toggle', 'modal');
+      tr.setAttribute('data-bs-target', '#bookingModal');
+      tr.addEventListener('click', (e) => {
+      if (e.target.tagName === 'BUTTON') return; // ignore if clicked button
+      showBookingDetail(b);
+      });
       tr.innerHTML = `
         <td>${b.villaName}</td>
         <td>${b.roomName || '-'}</td>
@@ -99,6 +106,20 @@
       tbody.appendChild(tr);
     });
   }
+function showBookingDetail(b) {
+  const body = document.getElementById('bookingDetailBody');
+  body.innerHTML = `
+    <p><strong>Villa:</strong> ${b.villaName}</p>
+    <p><strong>Room:</strong> ${b.roomName || '-'}</p>
+    <p><strong>Guest Name:</strong> ${b.name}</p>
+    <p><strong>Email:</strong> ${b.email}</p>
+    <p><strong>Check-in:</strong> ${b.checkin?.slice(0, 10)}</p>
+    <p><strong>Check-out:</strong> ${b.checkout?.slice(0, 10)}</p>
+    <p><strong>Guest Breakdown:</strong> ${b.guestDetail || b.guests}</p>
+    <p><strong>Status:</strong> <span class="status-badge ${b.status}">${b.status}</span></p>
+    <p><strong>Special Requests:</strong><br/>${b.notes || '-'}</p>
+  `;
+}
 
 function applyFilters() {
   const term = document.getElementById('searchInput').value.toLowerCase();
@@ -145,6 +166,21 @@ function applyFilters() {
     }
   }
 </script>
+<!-- Booking Detail Modal -->
+<div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Booking Detail</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" id="bookingDetailBody">
+        <!-- Filled dynamically -->
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
