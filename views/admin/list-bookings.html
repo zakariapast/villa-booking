@@ -34,20 +34,21 @@
   </style>
 </head>
 <body>
-<h2>Booking List</h2>
-<div class="row mb-3">
-  <div class="col-md-6">
-    <input type="text" id="searchInput" class="form-control" placeholder="Search by guest, email, or villa..." />
-  </div>
-  <div class="col-md-4">
-    <select id="statusFilter" class="form-select">
-      <option value="">All Statuses</option>
-      <option value="pending">Pending</option>
-      <option value="confirmed">Confirmed</option>
-      <option value="cancelled">Cancelled</option>
-    </select>
-  </div>
-</div>
+<h2>Booking List</h2><ul class="nav nav-tabs mb-3" id="statusTabs">
+  <li class="nav-item">
+    <a class="nav-link active" data-status="">All</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-status="pending">Pending</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-status="confirmed">Confirmed</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-status="cancelled">Cancelled</a>
+  </li>
+</ul>
+<input type="text" id="searchInput" class="form-control mb-3" placeholder="Search by guest, email, or villa..." />
     <table class="table table-bordered" id="bookingTable">
       <thead>
         <tr>
@@ -121,9 +122,10 @@ function showBookingDetail(b) {
   `;
 }
 
+let selectedStatus = '';
+
 function applyFilters() {
   const term = document.getElementById('searchInput').value.toLowerCase();
-  const status = document.getElementById('statusFilter').value;
 
   const filtered = allBookings.filter(b => {
     const matchesSearch =
@@ -131,17 +133,24 @@ function applyFilters() {
       (b.email || '').toLowerCase().includes(term) ||
       (b.villaName || '').toLowerCase().includes(term);
 
-    const matchesStatus = status === '' || b.status === status;
+    const matchesStatus = selectedStatus === '' || b.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
 
   renderBookings(filtered);
 }
 
-
   document.getElementById('searchInput').addEventListener('input', applyFilters);
-  document.getElementById('statusFilter').addEventListener('change', applyFilters);
+ // document.getElementById('statusFilter').addEventListener('change', applyFilters);
   loadBookings();
+  document.querySelectorAll('#statusTabs .nav-link').forEach(tab => {
+  tab.addEventListener('click', function () {
+    document.querySelectorAll('#statusTabs .nav-link').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    selectedStatus = this.getAttribute('data-status');
+    applyFilters();
+  });
+});
 
   async function updateStatus(id, newStatus) {
     if (!confirm(`Are you sure to set status to ${newStatus}?`)) return;
