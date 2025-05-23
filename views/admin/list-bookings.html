@@ -49,6 +49,7 @@
   </li>
 </ul>
 <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search by guest, email, or villa..." />
+  <button class="btn btn-success mb-3" onclick="exportToExcel()">Export to Excel</button>
     <table class="table table-bordered" id="bookingTable">
       <thead>
         <tr>
@@ -174,6 +175,26 @@ function applyFilters() {
       alert("Error occurred");
     }
   }
+  function exportToExcel() {
+  const exportData = allBookings.map(b => ({
+    'Villa': b.villaName,
+    'Room': b.roomName || '-',
+    'Guest Name': b.name,
+    'Email': b.email,
+    'Check-in': b.checkin?.slice(0,10),
+    'Check-out': b.checkout?.slice(0,10),
+    'Guests': b.guestDetail || b.guests,
+    'Status': b.status,
+    'Special Requests': b.notes || '-',
+    'Created At': new Date(b.createdAt).toLocaleString()
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Bookings');
+  XLSX.writeFile(workbook, 'villa-bookings.xlsx');
+}
+
 </script>
 <!-- Booking Detail Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
@@ -190,6 +211,7 @@ function applyFilters() {
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.full.min.js"></script>
 
 </body>
 </html>
