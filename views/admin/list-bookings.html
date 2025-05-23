@@ -36,6 +36,10 @@
 <body>
   <h2>Booking List</h2>
   <div class="table-responsive">
+  <h2>Booking List</h2>
+  <div class="mb-3">
+  <input type="text" id="searchInput" class="form-control" placeholder="Search by guest, email, or villa..." />
+  </div>
     <table class="table table-bordered" id="bookingTable">
       <thead>
         <tr>
@@ -52,57 +56,78 @@
     </table>
   </div>
 
-  <script>
-    async function loadBookings() {
-      try {
-        const res = await fetch('/api/bookings');
-        const data = await res.json();
-        const tbody = document.getElementById('bookingList');
-        tbody.innerHTML = '';
+<script>
+  let allBookings = [];
 
-        data.forEach(b => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${b.villaName}</td>
-            <td>${b.roomName || '-'}</td>
-            <td>${b.name}</td>
-            <td>${b.email}</td>
-            <td>${b.checkin?.slice(0,10)} → ${b.checkout?.slice(0,10)}</td>
-            <td>${b.guestDetail || b.guests}</td>
-            <td>
-              <span class="status-badge ${b.status}">${b.status}</span><br/>
-              <button class="btn btn-sm btn-success me-1" onclick="updateStatus('${b.id}', 'confirmed')">Confirm</button>
-              <button class="btn btn-sm btn-danger" onclick="updateStatus('${b.id}', 'cancelled')">Cancel</button>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) {
-        console.error('Failed to load bookings:', err);
-      }
+  async function loadBookings() {
+    try {
+      const res = await fetch('/api/bookings');
+      allBookings = await res.json();
+      renderBookings(allBookings);
+    } catch (err) {
+      console.error('Failed to load bookings:', err);
     }
-    loadBookings();
-    async function updateStatus(id, newStatus) {
-  if (!confirm(`Are you sure to set status to ${newStatus}?`)) return;
-
-  try {
-    const res = await fetch(`/api/bookings/${id}/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: newStatus })
-    });
-
-    if (res.ok) {
-      alert("Status updated");
-      loadBookings();
-    } else {
-      alert("Failed to update status");
-    }
-  } catch (err) {
-    console.error("Status update error:", err);
-    alert("Error occurred");
   }
-}
-  </script>
+
+  function renderBookings(bookings) {
+    const tbody = document.getElementById('bookingList');
+    tbody.innerHTML = '';
+
+    bookings.forEach(b => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${b.villaName}</td>
+        <td>${b.roomName || '-'}</td>
+        <td>${b.name}</td>
+        <td>${b.email}</td>
+        <td>${b.checkin?.slice(0,10)} → ${b.checkout?.slice(0,10)}</td>
+        <td>${b.guestDetail || b.guests}</td>
+        <td>
+          <span class="status-badge ${b.status}">${b.status}</span><br/>
+          <button class="btn btn-sm btn-success me-1" onclick="updateStatus('${b.id}', 'confirmed')">Confirm</button>
+          <button class="btn btn-sm btn-danger" onclick="updateStatus('${b.id}', 'cancelled')">Cancel</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function handleSearch() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allBookings.filter(b =>
+      (b.name || '').toLowerCase().includes(term) ||
+      (b.email || '').toLowerCase().includes(term) ||
+      (b.villaName || '').toLowerCase().includes(term)
+    );
+    renderBookings(filtered);
+  }
+
+  document.getElementById('searchInput').addEventListener('input', handleSearch);
+  loadBookings();
+
+  async function updateStatus(id, newStatus) {
+    if (!confirm(`Are you sure to set status to ${newStatus}?`)) return;
+
+    try {
+      const res = await fetch(`/api/bookings/${id}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (res.ok) {
+        alert("Status updated");
+        await loadBookings();
+        handleSearch(); // maintain filter after reload
+      } else {
+        alert("Failed to update status");
+      }
+    } catch (err) {
+      console.error("Status update error:", err);
+      alert("Error occurred");
+    }
+  }
+</script>
+
 </body>
 </html>
