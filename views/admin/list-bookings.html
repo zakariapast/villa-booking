@@ -51,17 +51,18 @@
 <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search by guest, email, or villa..." />
   <button class="btn btn-success mb-3" onclick="exportToExcel()">Export to Excel</button>
     <table class="table table-bordered" id="bookingTable">
-      <thead>
-        <tr>
-          <th>Villa</th>
-          <th>Room</th>
-          <th>Guest</th>
-          <th>Email</th>
-          <th>Dates</th>
-          <th>Guests</th>
-          <th>Status</th>
-        </tr>
-      </thead>
+<thead>
+  <tr>
+    <th onclick="setSort('villaName')">Villa <span id="sort-villaName"></span></th>
+    <th onclick="setSort('roomName')">Room <span id="sort-roomName"></span></th>
+    <th onclick="setSort('name')">Guest <span id="sort-name"></span></th>
+    <th onclick="setSort('email')">Email <span id="sort-email"></span></th>
+    <th onclick="setSort('checkin')">Dates <span id="sort-checkin"></span></th>
+    <th onclick="setSort('guestDetail')">Guests <span id="sort-guestDetail"></span></th>
+    <th onclick="setSort('status')">Status <span id="sort-status"></span></th>
+  </tr>
+</thead>
+
       <tbody id="bookingList"></tbody>
     </table>
   </div>
@@ -73,6 +74,27 @@
   let allBookings = [];
   let currentPage = 1;
   const rowsPerPage = 10;
+  let sortField = '';
+  let sortDirection = 'asc';
+
+function setSort(field) {
+  if (sortField === field) {
+    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortField = field;
+    sortDirection = 'asc';
+  }
+  updateSortIcons();
+  applyFilters();
+}
+function updateSortIcons() {
+  const fields = ['villaName', 'roomName', 'name', 'email', 'checkin', 'guestDetail', 'status'];
+  fields.forEach(field => {
+    const el = document.getElementById('sort-' + field);
+    if (!el) return;
+    el.textContent = (field === sortField) ? (sortDirection === 'asc' ? '↑' : '↓') : '';
+  });
+}
 
 
   async function loadBookings() {
@@ -169,6 +191,24 @@ function applyFilters() {
     const matchesStatus = selectedStatus === '' || b.status === selectedStatus;
     return matchesSearch && matchesStatus;
   });
+if (sortField) {
+  filtered.sort((a, b) => {
+    let valA = a[sortField] || '';
+    let valB = b[sortField] || '';
+
+    if (sortField === 'checkin' || sortField === 'checkout') {
+      valA = new Date(valA);
+      valB = new Date(valB);
+    } else {
+      valA = valA.toString().toLowerCase();
+      valB = valB.toString().toLowerCase();
+    }
+
+    if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+    if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+}
 
   renderBookings(filtered);
 }
