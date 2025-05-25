@@ -259,8 +259,41 @@ if (sortField) {
       alert("Error occurred");
     }
   }
+  function getFilteredSortedBookings() {
+  const term = document.getElementById('searchInput').value.toLowerCase();
+
+  let filtered = allBookings.filter(b => {
+    const matchesSearch =
+      (b.name || '').toLowerCase().includes(term) ||
+      (b.email || '').toLowerCase().includes(term) ||
+      (b.villaName || '').toLowerCase().includes(term);
+    const matchesStatus = selectedStatus === '' || b.status === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  if (sortField) {
+    filtered.sort((a, b) => {
+      let valA = a[sortField] || '';
+      let valB = b[sortField] || '';
+
+      if (sortField === 'checkin' || sortField === 'checkout' || sortField === 'createdAt') {
+        valA = new Date(valA);
+        valB = new Date(valB);
+      } else {
+        valA = valA.toString().toLowerCase();
+        valB = valB.toString().toLowerCase();
+      }
+
+      if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  return filtered;
+}
   function exportToExcel() {
-  const exportData = allBookings.map(b => ({
+  const exportData = getFilteredSortedBookings().map(b => ({
     'Villa': b.villaName,
     'Room': b.roomName || '-',
     'Guest Name': b.name,
