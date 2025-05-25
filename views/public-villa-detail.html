@@ -225,6 +225,27 @@
             </div>
             <button type="submit" class="btn btn-primary w-100">Submit Booking</button>
           </form>
+          <!-- Confirm Booking Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Confirm Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+<div class="modal-body">
+  <div class="alert alert-info text-center">Please confirm the details below:</div>
+  <div id="confirmModalBody"></div>
+</div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmSubmitBtn">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
+
         </div>
       </div>
     </div>
@@ -395,13 +416,13 @@ async function loadRooms(villaId) {
   document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
 }
 
-document.getElementById('bookingForm').addEventListener('submit', async function (e) {
+document.getElementById('bookingForm').addEventListener('submit', function (e) {
   e.preventDefault();
 
-  const urlParams = new URLSearchParams(window.location.search);
-  const villaId = urlParams.get('id');
-  const roomId = document.getElementById('roomSelector').selectedOptions[0]?.getAttribute('data-room-id') || null;
-  const roomText = document.getElementById('roomSelector').selectedOptions[0]?.textContent || '';
+  const roomSelector = document.getElementById('roomSelector');
+  const villaId = new URLSearchParams(window.location.search).get('id');
+  const roomId = roomSelector.selectedOptions[0]?.getAttribute('data-room-id') || null;
+  const roomText = roomSelector.selectedOptions[0]?.textContent || '';
   const checkin = document.getElementById('checkin').value;
   const checkout = document.getElementById('checkout').value;
   const name = document.getElementById('name').value;
@@ -414,45 +435,57 @@ document.getElementById('bookingForm').addEventListener('submit', async function
     return;
   }
 
-  const confirmation = confirm(
-    `📝 Confirm Booking:\n\nName: ${name}\nEmail: ${email}\nRoom: ${roomText}\nGuests: ${guests}\nCheck-in: ${checkin}\nCheck-out: ${checkout}\n\nSubmit now?`
-  );
+  // Fill modal body with booking info
+  document.getElementById('confirmModalBody').innerHTML = `
+    <p><strong>Name:</strong> ${name}</p>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Room:</strong> ${roomText}</p>
+    <p><strong>Guests:</strong> ${guests}</p>
+    <p><strong>Check-in:</strong> ${checkin}</p>
+    <p><strong>Check-out:</strong> ${checkout}</p>
+  `;
 
-  if (!confirmation) return;
 
-  const payload = {
-    villaId,
-    roomId,
-    checkin,
-    checkout,
-    name,
-    email,
-    guests,
-    notes
-  };
+  // Show modal
+  const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  confirmModal.show();
 
-  try {
-    const res = await fetch('/api/bookings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+  // Attach payload to the submit button temporarily
+  document.getElementById('confirmSubmitBtn').onclick = async () => {
+    const payload = { villaId, roomId, checkin, checkout, name, email, guests, notes };
+    
+  const submitBtn = document.getElementById('confirmSubmitBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = 'Submitting...';
 
-    if (res.status === 201) {
-      alert("✅ Booking submitted successfully! Awaiting confirmation.");
-      document.getElementById('bookingForm').reset();
-      document.getElementById('guestSummary').value = "1 Adult";
-      document.getElementById('pricePreview').textContent = "";
-    } else if (res.status === 409) {
-      alert("⚠️ Sorry, selected dates are already booked.");
-    } else {
-      alert("❌ Failed to submit booking");
+    try {
+      const res = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.status === 201) {
+        alert("✅ Booking submitted successfully!");
+        document.getElementById('bookingForm').reset();
+        document.getElementById('guestSummary').value = "1 Adult";
+        document.getElementById('pricePreview').textContent = "";
+        confirmModal.hide();
+      } else if (res.status === 409) {
+        alert("⚠️ Sorry, selected dates are already booked.");
+      } else {
+        alert("❌ Failed to submit booking");
+      }
+    } catch (err) {
+      console.error("Booking error:", err);
+      alert("❌ Booking error");
     }
-  } catch (err) {
-    console.error("Booking error:", err);
-    alert("❌ Booking error");
-  }
+    submitBtn.disabled = false;
+submitBtn.innerHTML = 'Submit';
+
+  };
 });
+
 
 </script>
   
