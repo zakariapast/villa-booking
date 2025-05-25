@@ -235,8 +235,24 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
-    flatpickr("#checkin", { minDate: "today" });
-    flatpickr("#checkout", { minDate: "today" });
+    let checkinPicker, checkoutPicker;
+
+    checkinPicker = flatpickr("#checkin", {
+    minDate: "today",
+    onChange: function (selectedDates) {
+    const checkinDate = selectedDates[0];
+    if (checkoutPicker) {
+      // force minimum 1 night
+      const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
+      checkoutPicker.set("minDate", nextDay);
+        }
+      }
+    });
+
+checkoutPicker = flatpickr("#checkout", {
+  minDate: new Date().fp_incr(1), // tomorrow by default
+});
+
 
     document.addEventListener('click', function (e) {
       const dropdown = document.getElementById('guestDropdown');
