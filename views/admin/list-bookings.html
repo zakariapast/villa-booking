@@ -54,6 +54,7 @@
     <table class="table table-bordered" id="bookingTable">
 <thead>
   <tr>
+    <th onclick="setSort('createdAt')">Created</th>
     <th onclick="setSort('villaName')">Villa <span id="sort-villaName"></span></th>
     <th onclick="setSort('roomName')">Room <span id="sort-roomName"></span></th>
     <th onclick="setSort('name')">Guest <span id="sort-name"></span></th>
@@ -128,6 +129,7 @@ function renderBookings(bookings) {
       showBookingDetail(b);
     });
     tr.innerHTML = `
+      <td>${new Date(b.createdAt).toLocaleString()}</td>
       <td>${b.villaName}</td>
       <td>${b.roomName || '-'}</td>
       <td>${b.name}</td>
