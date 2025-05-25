@@ -416,6 +416,11 @@ async function loadRooms(villaId) {
   document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
 }
 
+</script>
+  <script>
+let payload = {};
+let confirmModal;
+
 document.getElementById('bookingForm').addEventListener('submit', function (e) {
   e.preventDefault();
 
@@ -435,7 +440,7 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
     return;
   }
 
-  // Fill modal body with booking info
+  // Prepare modal content
   document.getElementById('confirmModalBody').innerHTML = `
     <p><strong>Name:</strong> ${name}</p>
     <p><strong>Email:</strong> ${email}</p>
@@ -445,49 +450,49 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
     <p><strong>Check-out:</strong> ${checkout}</p>
   `;
 
+  // Prepare payload for global use
+  payload = { villaId, roomId, checkin, checkout, name, email, guests, notes };
 
   // Show modal
-  const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+  confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
   confirmModal.show();
-
-  // Attach payload to the submit button temporarily
-  document.getElementById('confirmSubmitBtn').onclick = async () => {
-    const payload = { villaId, roomId, checkin, checkout, name, email, guests, notes };
-    
-  const submitBtn = document.getElementById('confirmSubmitBtn');
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = 'Submitting...';
-
-    try {
-      const res = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.status === 201) {
-        alert("✅ Booking submitted successfully!");
-        document.getElementById('bookingForm').reset();
-        document.getElementById('guestSummary').value = "1 Adult";
-        document.getElementById('pricePreview').textContent = "";
-        confirmModal.hide();
-      } else if (res.status === 409) {
-        alert("⚠️ Sorry, selected dates are already booked.");
-      } else {
-        alert("❌ Failed to submit booking");
-      }
-    } catch (err) {
-      console.error("Booking error:", err);
-      alert("❌ Booking error");
-    }
-    submitBtn.disabled = false;
-submitBtn.innerHTML = 'Submit';
-
-  };
 });
 
+// Attach event ONCE
+document.getElementById('confirmSubmitBtn').addEventListener('click', async function () {
+  const btn = this;
+  btn.disabled = true;
+  btn.innerHTML = "Submitting...";
 
+  try {
+    const res = await fetch('/api/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.status === 201) {
+      alert("✅ Booking submitted successfully!");
+      checkinPicker.clear();  // Reset flatpickr date fields
+      checkoutPicker.clear();
+      document.getElementById('bookingForm').reset();  // Reset form and other elements
+      document.getElementById('guestSummary').value = "1 Adult";
+      document.getElementById('pricePreview').textContent = "";
+      confirmModal.hide(); // Hide the confirmation modal
+    } else if (res.status === 409) {
+      alert("⚠️ Sorry, selected dates are already booked.");
+    } else {
+      alert("❌ Failed to submit booking");
+    }
+  } catch (err) {
+    console.error("Booking error:", err);
+    alert("❌ Booking error");
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = "Submit";
+});
 </script>
-  
+
 </body>
 </html>
