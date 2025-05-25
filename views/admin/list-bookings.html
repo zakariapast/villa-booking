@@ -309,7 +309,9 @@ if (sortField) {
   const worksheet = XLSX.utils.json_to_sheet(exportData);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Bookings');
-  XLSX.writeFile(workbook, 'villa-bookings.xlsx');
+  const label = selectedStatus || 'all';
+  XLSX.writeFile(workbook, `villa-bookings-${label}.xlsx`);
+
 }
 
 </script>
