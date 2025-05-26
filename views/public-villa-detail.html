@@ -456,15 +456,29 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
   payload = { villaId, roomId, checkin, checkout, name, email, guests, notes };
 
   // Show modal
-  const modalEl = document.getElementById('confirmModal');
   const offcanvasEl = document.getElementById('confirmPanel');
 confirmPanel = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
 confirmPanel.show();
 
 
 });
-
-// Attach event ONCE
+</script>
+<!-- Confirm Booking Offcanvas -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="confirmPanel" aria-labelledby="confirmLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="confirmLabel">Confirm Booking</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="alert alert-info text-center">Please confirm the details below:</div>
+    <div id="confirmModalBody"></div>
+    <div class="mt-4 d-grid">
+      <button class="btn btn-primary" id="confirmSubmitBtn">Submit</button>
+    </div>
+  </div>
+</div>
+<script>
+  // Attach event ONCE
 document.getElementById('confirmSubmitBtn').addEventListener('click', async function () {
   const btn = this;
   btn.disabled = true;
@@ -499,20 +513,5 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
   btn.innerHTML = "Submit";
 });
 </script>
-<!-- Confirm Booking Offcanvas -->
-<div class="offcanvas offcanvas-end" tabindex="-1" id="confirmPanel" aria-labelledby="confirmLabel">
-  <div class="offcanvas-header">
-    <h5 class="offcanvas-title" id="confirmLabel">Confirm Booking</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-  </div>
-  <div class="offcanvas-body">
-    <div class="alert alert-info text-center">Please confirm the details below:</div>
-    <div id="confirmModalBody"></div>
-    <div class="mt-4 d-grid">
-      <button class="btn btn-primary" id="confirmSubmitBtn">Submit</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
