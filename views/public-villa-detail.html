@@ -481,8 +481,10 @@ confirmPanel.show();
   // Attach event ONCE
 document.getElementById('confirmSubmitBtn').addEventListener('click', async function () {
   const btn = this;
+  const panelBody = document.querySelector('#confirmPanel .offcanvas-body');
+
   btn.disabled = true;
-  btn.innerHTML = "Submitting...";
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Submitting...`;
 
   try {
     const res = await fetch('/api/bookings', {
@@ -492,29 +494,36 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
     });
 
     if (res.status === 201) {
-      alert("✅ Booking submitted successfully!");
-      checkinPicker.clear();  // Reset flatpickr date fields
+      // Clear form
+      checkinPicker.clear();
       checkoutPicker.clear();
-      document.getElementById('bookingForm').reset();  // Reset form and other elements
+      document.getElementById('bookingForm').reset();
       document.getElementById('guestSummary').value = "1 Adult";
       document.getElementById('pricePreview').textContent = "";
-      if (confirmPanel && typeof confirmPanel.hide === 'function') {
-  confirmPanel.hide();
-}
-      payload = null;
+
+      // Replace content inside the offcanvas with success message
+      panelBody.innerHTML = `
+        <div class="alert alert-success text-center">
+          ✅ Booking submitted successfully!
+        </div>
+        <div class="mt-3 d-grid">
+          <button class="btn btn-secondary" onclick="bootstrap.Offcanvas.getInstance(document.getElementById('confirmPanel')).hide()">Close</button>
+        </div>
+      `;
     } else if (res.status === 409) {
-      alert("⚠️ Sorry, selected dates are already booked.");
+      panelBody.innerHTML = `<div class="alert alert-warning text-center">⚠️ Sorry, selected dates are already booked.</div>`;
     } else {
-      alert("❌ Failed to submit booking");
+      panelBody.innerHTML = `<div class="alert alert-danger text-center">❌ Failed to submit booking.</div>`;
     }
   } catch (err) {
     console.error("Booking error:", err);
-    alert("❌ Booking error");
+    panelBody.innerHTML = `<div class="alert alert-danger text-center">❌ Booking error.</div>`;
   }
 
   btn.disabled = false;
   btn.innerHTML = "Submit";
 });
+
 </script>
 </body>
 </html>
