@@ -255,23 +255,44 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
-    let checkinPicker, checkoutPicker;
+   let checkinPicker, checkoutPicker;
+  async function setupDatePickers() {
+  const villaId = new URLSearchParams(window.location.search).get('id');
+  let blockedRanges = [];
 
-    checkinPicker = flatpickr("#checkin", {
+  try {
+    const res = await fetch(`/api/bookings/calendar?villaId=${villaId}`);
+    if (res.ok) {
+      blockedRanges = await res.json();
+    }
+  } catch (err) {
+    console.error("Failed to load blocked dates:", err);
+  }
+
+  checkinPicker = flatpickr("#checkin", {
     minDate: "today",
+    disable: blockedRanges,
     onChange: function (selectedDates) {
-    const checkinDate = selectedDates[0];
-    if (checkoutPicker) {
-      // force minimum 1 night
-      const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
-      checkoutPicker.set("minDate", nextDay);
-        }
+      const checkinDate = selectedDates[0];
+      if (checkoutPicker) {
+        const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
+        checkoutPicker.set("minDate", nextDay);
       }
-    });
+    }
+  });
 
-checkoutPicker = flatpickr("#checkout", {
-  minDate: new Date().fp_incr(1), // tomorrow by default
-});
+  checkoutPicker = flatpickr("#checkout", {
+    minDate: new Date().fp_incr(1),
+    disable: blockedRanges
+  });
+}
+async function init() {
+  await loadVillaDetails();
+  await setupDatePickers();
+}
+
+init();
+
 
 
     document.addEventListener('click', function (e) {
@@ -388,6 +409,8 @@ async function loadRooms(villaId) {
     option.textContent = `${room.name} - IDR ${Number(room.price).toLocaleString()}/night`;
     roomSelector.appendChild(option);
     });
+    roomSelector.disabled = rooms.length === 0;
+
 
   } catch (err) {
     console.error("Failed to load rooms:", err);
@@ -436,6 +459,11 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
   const email = document.getElementById('email').value;
   const notes = document.getElementById('notes').value;
   const guests = Object.values(guestData).reduce((a, b) => a + b, 0);
+  // Extra safety: ensure dates are truly selected
+  if (!checkinPicker.selectedDates.length || !checkoutPicker.selectedDates.length) {
+    alert("Please select valid check-in and check-out dates.");
+    return;
+  }
 
   if (!checkin || !checkout || !name || !email || !villaId) {
     alert("Please fill in all required fields");
@@ -500,7 +528,7 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
       document.getElementById('bookingForm').reset();
       document.getElementById('guestSummary').value = "1 Adult";
       document.getElementById('pricePreview').textContent = "";
-
+await setupDatePickers(); 
       // Replace content inside the offcanvas with success message
       panelBody.innerHTML = `
         <div class="alert alert-success text-center">
