@@ -231,32 +231,7 @@
               <textarea id="notes" class="form-control"></textarea>
             </div>
             <button type="submit" class="btn btn-primary w-100">Submit Booking</button>
-          </form>
-          <!-- Confirm Booking Modal -->
-<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="confirmModalLabel">Confirm Booking</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-<div class="modal-body">
-  <div class="alert alert-info text-center">Please confirm the details below:</div>
-  <div id="confirmModalBody"></div>
-</div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="confirmSubmitBtn">Submit</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-        </div>
-      </div>
-    </div>
-  </div>
+            </form>
 
   <div class="footer">&copy; 2025 Villa Booking. All rights reserved.</div>
 
@@ -501,6 +476,25 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
   btn.innerHTML = "Submit";
 });
 </script>
+<!-- Confirm Booking Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmModalLabel">Confirm Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-info text-center">Please confirm the details below:</div>
+        <div id="confirmModalBody"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmSubmitBtn">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
