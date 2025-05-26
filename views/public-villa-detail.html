@@ -120,16 +120,16 @@
       color: #888;
     }
     /* Fix modal not clickable when over Google Maps */
-.modal-backdrop {
-  z-index: 1050 !important;
-}
-.modal {
-  z-index: 1060 !important;
-}
 #villaMap iframe {
   z-index: 1 !important;
   position: relative;
 }
+    #villaMap iframe.disable-map {
+  pointer-events: none !important;
+  z-index: 0 !important;
+  position: relative;
+}
+
 
   </style>
 </head>
@@ -364,17 +364,17 @@ document.getElementById('roomSelector').addEventListener('change', calculateTota
 
 // ✅ Fix iframe click issue when modal opens
 const modalEl = document.getElementById('confirmModal');
-if (modalEl) {
-  modalEl.addEventListener('show.bs.modal', () => {
-    const mapIframe = document.querySelector('#villaMap iframe');
-    if (mapIframe) mapIframe.style.pointerEvents = 'none';
-  });
 
-  modalEl.addEventListener('hidden.bs.modal', () => {
-    const mapIframe = document.querySelector('#villaMap iframe');
-    if (mapIframe) mapIframe.style.pointerEvents = 'auto';
-  });
-}
+modalEl.addEventListener('show.bs.modal', () => {
+  const mapIframe = document.querySelector('#villaMap iframe');
+  if (mapIframe) mapIframe.classList.add('disable-map');
+});
+
+modalEl.addEventListener('hidden.bs.modal', () => {
+  const mapIframe = document.querySelector('#villaMap iframe');
+  if (mapIframe) mapIframe.classList.remove('disable-map');
+});
+
 
     } catch (err) {
       console.error("Error loading villa:", err);
