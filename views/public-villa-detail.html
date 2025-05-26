@@ -345,9 +345,25 @@ checkoutPicker = flatpickr("#checkout", {
       // Amenities (optional — static now, will connect later)
       // document.getElementById("amenitiesText").textContent = villa.amenities?.join(", ") || "No amenities listed";
       // ✅ Setup price preview events AFTER everything is ready
-      document.getElementById('checkin').addEventListener('change', calculateTotalPrice);
-      document.getElementById('checkout').addEventListener('change', calculateTotalPrice);
-      document.getElementById('roomSelector').addEventListener('change', calculateTotalPrice);
+      // ✅ Setup price preview events
+document.getElementById('checkin').addEventListener('change', calculateTotalPrice);
+document.getElementById('checkout').addEventListener('change', calculateTotalPrice);
+document.getElementById('roomSelector').addEventListener('change', calculateTotalPrice);
+
+// ✅ Fix iframe click issue when modal opens
+const modalEl = document.getElementById('confirmModal');
+if (modalEl) {
+  modalEl.addEventListener('show.bs.modal', () => {
+    const mapIframe = document.querySelector('#villaMap iframe');
+    if (mapIframe) mapIframe.style.pointerEvents = 'none';
+  });
+
+  modalEl.addEventListener('hidden.bs.modal', () => {
+    const mapIframe = document.querySelector('#villaMap iframe');
+    if (mapIframe) mapIframe.style.pointerEvents = 'auto';
+  });
+}
+
     } catch (err) {
       console.error("Error loading villa:", err);
       alert("Failed to load villa details");
@@ -494,19 +510,6 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
   btn.disabled = false;
   btn.innerHTML = "Submit";
 });
-</script>
-<script>
-  const modalEl = document.getElementById('confirmModal');
-
-  modalEl.addEventListener('show.bs.modal', () => {
-    const mapIframe = document.querySelector('#villaMap iframe');
-    if (mapIframe) mapIframe.style.pointerEvents = 'none';
-  });
-
-  modalEl.addEventListener('hidden.bs.modal', () => {
-    const mapIframe = document.querySelector('#villaMap iframe');
-    if (mapIframe) mapIframe.style.pointerEvents = 'auto';
-  });
 </script>
 
 </body>
