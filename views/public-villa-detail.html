@@ -498,7 +498,10 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
       document.getElementById('bookingForm').reset();  // Reset form and other elements
       document.getElementById('guestSummary').value = "1 Adult";
       document.getElementById('pricePreview').textContent = "";
-      confirmPanel.hide(); // Hide the confirmation panel
+      if (confirmPanel && typeof confirmPanel.hide === 'function') {
+  confirmPanel.hide();
+}
+      payload = null;
     } else if (res.status === 409) {
       alert("⚠️ Sorry, selected dates are already booked.");
     } else {
