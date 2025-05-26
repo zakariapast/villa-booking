@@ -101,7 +101,6 @@ router.post('/', async (req, res) => {
 
     const result = await db.collection('bookings').insertOne(booking);
 
-    // Generate booking email preview (sample only, not sent)
     const emailHtml = `
       <h2>Villa Booking Confirmation</h2>
       <p>Hello <strong>${name}</strong>,</p>
@@ -119,22 +118,21 @@ router.post('/', async (req, res) => {
       <p style="font-size: 0.9em; color: gray;">This is a preview only. Email sending is disabled in this environment.</p>
     `;
 
-try {
-  // ... insertOne and validation logic
+    console.log('📧 Booking email preview:\n', emailHtml);
 
-  const result = await db.collection('bookings').insertOne(booking);
-  res.status(201).json({
-    message: 'Booking created. Email preview shown in console.',
-    bookingId: result.insertedId
-  });
-  return; // ✅ Stop further execution
+    res.status(201).json({
+      message: 'Booking created. Email preview shown in console.',
+      bookingId: result.insertedId
+    });
+    return;
 
-} catch (err) {
-  console.error('Booking error:', err);
-  if (!res.headersSent) {
-    res.status(500).send('Failed to create booking');
+  } catch (err) {
+    console.error('Booking error:', err);
+    if (!res.headersSent) {
+      res.status(500).send('Failed to create booking');
+    }
   }
-}
+});
 
 
 router.get('/calendar', async (req, res) => {
