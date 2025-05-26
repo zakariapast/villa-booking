@@ -119,6 +119,13 @@
       font-size: 12px;
       color: #888;
     }
+    .modal-backdrop {
+    z-index: 1040 !important;
+    }
+  .modal {
+    z-index: 1050 !important;
+    }
+
   </style>
 </head>
 <body>
@@ -454,9 +461,8 @@ document.getElementById('bookingForm').addEventListener('submit', function (e) {
   payload = { villaId, roomId, checkin, checkout, name, email, guests, notes };
 
   // Show modal
-  const modalEl = document.getElementById('confirmModal');
-  confirmModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-  confirmModal.show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmModal')).show();
+
 
 });
 
@@ -480,7 +486,7 @@ document.getElementById('confirmSubmitBtn').addEventListener('click', async func
       document.getElementById('bookingForm').reset();  // Reset form and other elements
       document.getElementById('guestSummary').value = "1 Adult";
       document.getElementById('pricePreview').textContent = "";
-      confirmModal.hide(); // Hide the confirmation modal
+      bootstrap.Modal.getOrCreateInstance(document.getElementById('confirmModal')).hide();
     } else if (res.status === 409) {
       alert("⚠️ Sorry, selected dates are already booked.");
     } else {
