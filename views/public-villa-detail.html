@@ -272,13 +272,14 @@
   checkinPicker = flatpickr("#checkin", {
     minDate: "today",
     disable: blockedRanges,
-    onChange: function (selectedDates) {
-      const checkinDate = selectedDates[0];
-      if (checkoutPicker) {
-        const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
-        checkoutPicker.set("minDate", nextDay);
-      }
-    }
+onChange: function (selectedDates) {
+  const checkinDate = selectedDates[0];
+  if (checkoutPicker && checkinDate) {
+    const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
+    checkoutPicker.set("minDate", nextDay);
+  }
+},
+allowInput: false
   });
 
   checkoutPicker = flatpickr("#checkout", {
