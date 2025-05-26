@@ -119,19 +119,23 @@ router.post('/', async (req, res) => {
       <p style="font-size: 0.9em; color: gray;">This is a preview only. Email sending is disabled in this environment.</p>
     `;
 
-    console.log('📧 Booking email preview (HTML):\n', emailHtml);
+try {
+  // ... insertOne and validation logic
 
-return res.status(201).json({
-  message: 'Booking created. Email preview shown in console.',
-  bookingId: result.insertedId
-});
+  const result = await db.collection('bookings').insertOne(booking);
+  res.status(201).json({
+    message: 'Booking created. Email preview shown in console.',
+    bookingId: result.insertedId
+  });
+  return; // ✅ Stop further execution
 
-
-  } catch (err) {
-    console.error('Booking error:', err);
+} catch (err) {
+  console.error('Booking error:', err);
+  if (!res.headersSent) {
     res.status(500).send('Failed to create booking');
   }
-});
+}
+
 
 router.get('/calendar', async (req, res) => {
   const { villaId } = req.query;
@@ -144,10 +148,11 @@ router.get('/calendar', async (req, res) => {
       status: { $in: ['pending', 'confirmed'] }
     }).toArray();
 
-    const blockedRanges = bookings.map(b => ({
-      from: new Date(b.checkin),
-      to: new Date(b.checkout)
-    }));
+const blockedRanges = bookings.map(b => ({
+  from: new Date(b.checkin),
+  to: new Date(new Date(b.checkout).getTime() - 24 * 60 * 60 * 1000) // 1 day before checkout
+}));
+
 
     res.json(blockedRanges);
   } catch (err) {
