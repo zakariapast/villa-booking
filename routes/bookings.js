@@ -121,10 +121,38 @@ router.post('/', async (req, res) => {
 
     console.log('📧 Booking email preview (HTML):\n', emailHtml);
 
-    res.status(201).json({ message: 'Booking created. Email preview shown in console.', bookingId: result.insertedId });
+return res.status(201).json({
+  message: 'Booking created. Email preview shown in console.',
+  bookingId: result.insertedId
+});
+
+
   } catch (err) {
     console.error('Booking error:', err);
     res.status(500).send('Failed to create booking');
+  }
+});
+
+router.get('/calendar', async (req, res) => {
+  const { villaId } = req.query;
+  if (!villaId) return res.status(400).json({ error: 'Missing villaId' });
+
+  try {
+    const db = await connectToDB();
+    const bookings = await db.collection('bookings').find({
+      villaId,
+      status: { $in: ['pending', 'confirmed'] }
+    }).toArray();
+
+    const blockedRanges = bookings.map(b => ({
+      from: new Date(b.checkin),
+      to: new Date(b.checkout)
+    }));
+
+    res.json(blockedRanges);
+  } catch (err) {
+    console.error('Error fetching blocked dates:', err);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 
