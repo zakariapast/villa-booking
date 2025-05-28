@@ -135,11 +135,9 @@
         <div class="col-md-6">
           <div class="card">
             <div class="card-header">Recent Room Bookings</div>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">Deluxe Room - John Doe - 2025-06-01 to 2025-06-03</li>
-              <li class="list-group-item">Suite Room - Jane Smith - 2025-06-02 to 2025-06-04</li>
-              <li class="list-group-item">Garden Villa - Mike Ross - 2025-06-05 to 2025-06-07</li>
-            </ul>
+              <ul id="recentBookingsList" class="list-group list-group-flush">
+              <li class="list-group-item">Loading...</li>
+              </ul>
           </div>
         </div>
         <div class="col-md-6">
@@ -177,5 +175,37 @@
       }
     });
   </script>
+  <script>
+async function loadRecentBookings() {
+  const list = document.getElementById('recentBookingsList');
+  list.innerHTML = '<li class="list-group-item">Loading...</li>';
+
+  try {
+    const res = await fetch('/api/bookings/recent');
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      list.innerHTML = '<li class="list-group-item">No recent bookings.</li>';
+      return;
+    }
+
+    list.innerHTML = '';
+    data.forEach(b => {
+      const li = document.createElement('li');
+      const checkin = new Date(b.checkin).toISOString().slice(0, 10);
+      const checkout = new Date(b.checkout).toISOString().slice(0, 10);
+      li.className = 'list-group-item';
+      li.textContent = `${b.roomName} - ${b.guestName} - ${checkin} to ${checkout}`;
+      list.appendChild(li);
+    });
+  } catch (err) {
+    list.innerHTML = '<li class="list-group-item text-danger">Error loading bookings.</li>';
+    console.error(err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadRecentBookings);
+</script>
+
 </body>
 </html>
