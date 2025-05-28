@@ -158,5 +158,30 @@ const blockedRanges = bookings.map(b => ({
     res.status(500).json({ error: 'Server error' });
   }
 });
+router.get('/recent', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const bookings = await db.collection('bookings')
+      .find({})
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .toArray();
+
+    const rooms = await db.collection('rooms').find({}).toArray();
+    const result = bookings.map(b => {
+      const room = rooms.find(r => (r.id || r._id?.toString()) === b.roomId);
+      return {
+        roomName: room?.name || "Room",
+        guestName: b.name,
+        checkin: b.checkin,
+        checkout: b.checkout
+      };
+    });
+
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch recent bookings' });
+  }
+});
 
 module.exports = router;
