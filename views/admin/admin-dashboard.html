@@ -82,26 +82,33 @@
     <div class="container py-4">
       <h1 class="mb-4">Admin Dashboard</h1>
 
-      <div class="row g-4 mb-4">
-        <div class="col-md-4">
-          <div class="dashboard-tile tile-dark">
-            <h3>IDR 72,000,000</h3>
-            <p>Total Revenue (This Year)</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="dashboard-tile tile-dark">
-            <h3>IDR 24,000,000</h3>
-            <p>This Quarter</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="dashboard-tile tile-dark">
-            <h3>IDR 8,500,000</h3>
-            <p>This Month</p>
-          </div>
-        </div>
+<div class="row mb-4" id="revenue-section">
+  <div class="col-md-4">
+    <div class="card text-center bg-light shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">This Year</h5>
+        <p class="card-text fw-bold fs-4" id="revenue-year">Loading...</p>
       </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center bg-light shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">This Quarter</h5>
+        <p class="card-text fw-bold fs-4" id="revenue-quarter">Loading...</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center bg-light shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">This Month</h5>
+        <p class="card-text fw-bold fs-4" id="revenue-month">Loading...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 
       <div class="row g-4 mb-5">
         <div class="col-md-3">
@@ -242,6 +249,33 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSalesChart();     // Add this call
 });
 
+</script>
+<script>
+  async function loadRevenueStats() {
+    try {
+      const res = await fetch('/api/bookings/revenue-stats');
+      const data = await res.json();
+
+      document.getElementById('revenue-year').textContent = formatIDR(data.year);
+      document.getElementById('revenue-quarter').textContent = formatIDR(data.quarter);
+      document.getElementById('revenue-month').textContent = formatIDR(data.month);
+    } catch (err) {
+      console.error('Revenue fetch error:', err);
+      document.getElementById('revenue-year').textContent = 'Error';
+      document.getElementById('revenue-quarter').textContent = 'Error';
+      document.getElementById('revenue-month').textContent = 'Error';
+    }
+  }
+
+  function formatIDR(amount) {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'IDR',
+      maximumFractionDigits: 0
+    }).format(amount || 0);
+  }
+
+  loadRevenueStats();
 </script>
 
 
