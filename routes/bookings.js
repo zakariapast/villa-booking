@@ -213,5 +213,42 @@ router.get('/monthly-stats', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+// routes/bookings.js
+router.get('/revenue-stats', async (req, res) => {
+  try {
+    const db = await connectToDB();
+    const now = new Date();
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    const quarterStart = new Date(now.getFullYear(), Math.floor(now.getMonth() / 3) * 3, 1);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const bookings = await db.collection('bookings')
+      .find({ status: 'confirmed' })
+      .toArray();
+
+    let yearTotal = 0;
+    let quarterTotal = 0;
+    let monthTotal = 0;
+
+    bookings.forEach(b => {
+      const date = new Date(b.checkin);
+      const price = b.totalPrice || 0;
+
+      if (date >= yearStart) yearTotal += price;
+      if (date >= quarterStart) quarterTotal += price;
+      if (date >= monthStart) monthTotal += price;
+    });
+
+    res.json({
+      year: yearTotal,
+      quarter: quarterTotal,
+      month: monthTotal
+    });
+  } catch (err) {
+    console.error('Revenue stats error:', err);
+    res.status(500).json({ error: 'Failed to calculate revenue stats' });
+  }
+});
+
 
 module.exports = router;
