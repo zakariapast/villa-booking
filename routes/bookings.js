@@ -183,5 +183,35 @@ router.get('/recent', async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch recent bookings' });
   }
 });
+// GET /api/bookings/monthly-stats
+router.get('/monthly-stats', async (req, res) => {
+  try {
+    const db = await connectToDB();
+
+    const bookings = await db.collection('bookings')
+      .find({ status: { $in: ['confirmed', 'pending'] } })
+      .toArray();
+
+    const weeks = [0, 0, 0, 0]; // Week 1 to 4
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    bookings.forEach(b => {
+      const checkin = new Date(b.checkin);
+      if (
+        checkin >= monthStart &&
+        checkin.getMonth() === now.getMonth()
+      ) {
+        const week = Math.floor((checkin.getDate() - 1) / 7);
+        weeks[week] += 1;
+      }
+    });
+
+    res.json(weeks);
+  } catch (err) {
+    console.error('Monthly stats error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 module.exports = router;
