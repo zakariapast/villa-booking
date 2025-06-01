@@ -175,6 +175,21 @@
         <div class="booking-form-box">
           <h5>Book Your Stay</h5>
           <p id="pricePreview" class="text-muted"></p>
+          <div class="estimated-price mt-2">
+  <label for="currencySelect" class="form-label">Estimated Price in</label>
+  <div class="d-flex align-items-center">
+    <select id="currencySelect" class="form-select form-select-sm w-auto me-2">
+      <option value="USD" selected>USD</option>
+      <option value="EUR">EUR</option>
+      <option value="JPY">JPY</option>
+      <option value="AUD">AUD</option>
+      <option value="SGD">SGD</option>
+      <option value="GBP">GBP</option>
+      <option value="KRW">KRW</option>
+    </select>
+    <span id="convertedPrice" class="text-muted">Loading...</span>
+  </div>
+</div>
           <form id="bookingForm">
             <div class="mb-3">
               <label class="form-label">Select Room</label>
@@ -555,5 +570,60 @@ if (res.status === 201) {
 });
 
 </script>
+  <script>
+  async function getExchangeRates() {
+    try {
+      const res = await fetch('https://api.exchangerate.host/latest?base=IDR');
+      const data = await res.json();
+      return data.rates;
+    } catch (err) {
+      console.error('Exchange rate fetch error:', err);
+      return {};
+    }
+  }
+
+  function formatCurrency(amount, currency) {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  }
+
+  async function updateEstimatedPrice(totalIDR = null) {
+    const selectedCurrency = document.getElementById('currencySelect')?.value;
+    if (!selectedCurrency || !totalIDR) return;
+
+    const rates = await getExchangeRates();
+    const rate = rates[selectedCurrency];
+    if (rate) {
+      const converted = totalIDR * rate;
+      document.getElementById('convertedPrice').textContent = `≈ ${formatCurrency(converted, selectedCurrency)}`;
+    } else {
+      document.getElementById('convertedPrice').textContent = 'Unavailable';
+    }
+  }
+
+  // Hook into the price calculation
+  async function calculateTotalPrice() {
+    const checkin = document.getElementById('checkin')._flatpickr.selectedDates[0];
+    const checkout = document.getElementById('checkout')._flatpickr.selectedDates[0];
+    const roomPrice = Number(document.getElementById('roomSelector').value);
+
+    if (!checkin || !checkout || !roomPrice) return;
+
+    const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+    if (nights <= 0) return;
+
+    const total = nights * roomPrice;
+    document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
+    updateEstimatedPrice(total);
+  }
+
+  document.getElementById('currencySelect')?.addEventListener('change', () => {
+    calculateTotalPrice(); // Recalculate to update estimated price
+  });
+</script>
+
 </body>
 </html>
