@@ -400,6 +400,13 @@ async function loadRooms(villaId) {
       container.innerHTML = '<p class="text-muted">No rooms available for this villa.</p>';
       return;
     }
+    document.getElementById('roomSelector').addEventListener('change', () => {
+  const roomPrice = Number(document.getElementById('roomSelector').value);
+  if (!isNaN(roomPrice)) {
+    updateEstimatedPrice(roomPrice); // assume 1 night for display
+  }
+});
+
 
     rooms.forEach(room => {
       const roomCard = document.createElement('div');
@@ -605,20 +612,21 @@ if (res.status === 201) {
   }
 
   // Hook into the price calculation
-  async function calculateTotalPrice() {
-    const checkin = document.getElementById('checkin')._flatpickr.selectedDates[0];
-    const checkout = document.getElementById('checkout')._flatpickr.selectedDates[0];
-    const roomPrice = Number(document.getElementById('roomSelector').value);
+async function calculateTotalPrice() {
+  const checkin = document.getElementById('checkin')._flatpickr.selectedDates[0];
+  const checkout = document.getElementById('checkout')._flatpickr.selectedDates[0];
+  const roomPrice = Number(document.getElementById('roomSelector').value);
 
-    if (!checkin || !checkout || !roomPrice) return;
+  if (!checkin || !checkout || !roomPrice) return;
 
-    const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
-    if (nights <= 0) return;
+  const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+  if (nights <= 0) return;
 
-    const total = nights * roomPrice;
-    document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
-    updateEstimatedPrice(total);
-  }
+  const total = nights * roomPrice;
+  document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
+  updateEstimatedPrice(total);
+}
+
 
   document.getElementById('currencySelect')?.addEventListener('change', () => {
     calculateTotalPrice(); // Recalculate to update estimated price
