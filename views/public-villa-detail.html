@@ -174,10 +174,19 @@
       <div class="col-lg-4">
         <div class="booking-form-box">
           <h5>Book Your Stay</h5>
-          <small class="text-muted">(Displayed in IDR, payment will be made in IDR)</small>
-          <p id="pricePreview" class="text-muted"></p>
-          <div class="estimated-price mt-2">
-  <label for="currencySelect" class="form-label">Estimated Price in</label>
+
+          <form id="bookingForm">
+            <div class="mb-3">
+              <label class="form-label">Select Room</label>
+              <select id="roomSelector" class="form-select" required>
+              <option value="">-- Choose a room --</option>
+              </select>
+            </div>
+            <p id="pricePreview" class="text-muted mb-1"></p>
+<small class="text-muted">(Displayed in IDR, payment will be made in IDR)</small>
+<hr class="my-3" />
+<div class="estimated-price mt-2 mb-3">
+  <label for="currencySelect" class="form-label mb-1">Estimated Price in</label>
   <div class="d-flex align-items-center">
     <select id="currencySelect" class="form-select form-select-sm w-auto me-2">
       <option value="USD" selected>USD</option>
@@ -191,13 +200,7 @@
     <span id="convertedPrice" class="text-muted">—</span>
   </div>
 </div>
-          <form id="bookingForm">
-            <div class="mb-3">
-              <label class="form-label">Select Room</label>
-              <select id="roomSelector" class="form-select" required>
-              <option value="">-- Choose a room --</option>
-              </select>
-            </div>
+
             <div class="mb-3">
               <label class="form-label">Check-in</label>
               <input type="text" id="checkin" class="form-control" required />
@@ -460,21 +463,6 @@ document.getElementById('roomSelector').addEventListener('change', () => {
 
   // Call function
   loadVillaDetails();
-    function calculateTotalPrice() {
-  const checkin = document.getElementById('checkin')._flatpickr.selectedDates[0];
-  const checkout = document.getElementById('checkout')._flatpickr.selectedDates[0];
-  const roomPrice = Number(document.getElementById('roomSelector').value);
-
-  if (!checkin || !checkout || !roomPrice) return;
-
-  const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
-  if (nights <= 0) return;
-
-  const total = nights * roomPrice;
-  document.getElementById('pricePreview').textContent = 
-  `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''} (base price)`;
-
-}
 
 </script>
   <script>
@@ -628,18 +616,27 @@ if (res.status === 201) {
 
   // Hook into the price calculation
 async function calculateTotalPrice() {
-  const checkin = document.getElementById('checkin')._flatpickr.selectedDates[0];
-  const checkout = document.getElementById('checkout')._flatpickr.selectedDates[0];
+  const checkin = document.getElementById('checkin')._flatpickr?.selectedDates[0];
+  const checkout = document.getElementById('checkout')._flatpickr?.selectedDates[0];
   const roomPrice = Number(document.getElementById('roomSelector').value);
 
-  if (!checkin || !checkout || !roomPrice) return;
+  if (!roomPrice) {
+    document.getElementById('pricePreview').textContent = "";
+    document.getElementById('convertedPrice').textContent = "—";
+    return;
+  }
 
-  const nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
-  if (nights <= 0) return;
+  let nights = 1;
+
+  if (checkin && checkout) {
+    nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+    if (nights <= 0) nights = 1;
+  }
 
   const total = nights * roomPrice;
-  document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
-  updateEstimatedPrice(total);
+  document.getElementById('pricePreview').textContent = 
+    `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
+  await updateEstimatedPrice(total);
 }
 
 
