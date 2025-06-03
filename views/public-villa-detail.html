@@ -174,6 +174,7 @@
       <div class="col-lg-4">
         <div class="booking-form-box">
           <h5>Book Your Stay</h5>
+          <small class="text-muted">(Displayed in IDR, payment will be made in IDR)</small>
           <p id="pricePreview" class="text-muted"></p>
           <div class="estimated-price mt-2">
   <label for="currencySelect" class="form-label">Estimated Price in</label>
@@ -187,7 +188,7 @@
       <option value="GBP">GBP</option>
       <option value="KRW">KRW</option>
     </select>
-    <span id="convertedPrice" class="text-muted">Loading...</span>
+    <span id="convertedPrice" class="text-muted">—</span>
   </div>
 </div>
           <form id="bookingForm">
@@ -400,12 +401,24 @@ async function loadRooms(villaId) {
       container.innerHTML = '<p class="text-muted">No rooms available for this villa.</p>';
       return;
     }
-    document.getElementById('roomSelector').addEventListener('change', () => {
+document.getElementById('roomSelector').addEventListener('change', () => {
   const roomPrice = Number(document.getElementById('roomSelector').value);
   if (!isNaN(roomPrice)) {
-    updateEstimatedPrice(roomPrice); // assume 1 night for display
+    // fallback: assume 1 night if no checkin/checkout selected yet
+    const checkin = document.getElementById('checkin')._flatpickr?.selectedDates[0];
+    const checkout = document.getElementById('checkout')._flatpickr?.selectedDates[0];
+
+    let nights = 1;
+    if (checkin && checkout) {
+      nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
+      if (nights <= 0) nights = 1;
+    }
+
+    const estimated = nights * roomPrice;
+    updateEstimatedPrice(estimated);
   }
 });
+
 
 
     rooms.forEach(room => {
@@ -458,7 +471,9 @@ async function loadRooms(villaId) {
   if (nights <= 0) return;
 
   const total = nights * roomPrice;
-  document.getElementById('pricePreview').textContent = `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''}`;
+  document.getElementById('pricePreview').textContent = 
+  `IDR ${total.toLocaleString()} for ${nights} night${nights > 1 ? 's' : ''} (base price)`;
+
 }
 
 </script>
