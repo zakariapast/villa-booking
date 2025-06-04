@@ -596,17 +596,31 @@ if (res.status === 201) {
 
 </script>
   <script>
-  async function getExchangeRates() {
-    try {
-      const res = await fetch('https://api.exchangerate.host/latest?base=IDR');
-      const data = await res.json();
-      console.log("Raw exchange API response:", data);
-      return data.rates;
-    } catch (err) {
-      console.error('Exchange rate fetch error:', err);
-      return {};
+async function getExchangeRates() {
+  try {
+    const res = await fetch('https://api.exchangerate.host/latest?base=USD');
+    const data = await res.json();
+    console.log("Raw exchange API response:", data);
+
+    if (!data.success) throw new Error(data.error?.type || "Unknown error");
+
+    // Convert rates to IDR base manually (1 IDR = 1 / rate[IDR])
+    const idrRate = data.rates["IDR"];
+    if (!idrRate) throw new Error("IDR rate missing");
+
+    const convertedRates = {};
+    for (const [currency, rate] of Object.entries(data.rates)) {
+      convertedRates[currency] = rate / idrRate;
     }
+
+    console.log("Computed exchange rates from IDR:", convertedRates);
+    return convertedRates;
+  } catch (err) {
+    console.error('Exchange rate fetch error:', err);
+    return {};
   }
+}
+
 
   function formatCurrency(amount, currency) {
     return new Intl.NumberFormat(undefined, {
