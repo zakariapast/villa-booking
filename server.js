@@ -7,6 +7,9 @@ const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const dashboardRoutes = require('./routes/api/dashboard');
+app.use('/api/dashboard', dashboardRoutes);
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
