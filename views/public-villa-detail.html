@@ -621,6 +621,7 @@ async function updateEstimatedPrice(totalIDR = null) {
 
   const selectedCurrency = currencySelect.value;
 const rates = await getExchangeRates();
+  console.log("Fetched exchange rates:", rates);
 if (!rates || typeof rates !== 'object' || !(selectedCurrency in rates)) {
   document.getElementById('convertedPrice').textContent = 'Unavailable';
   return;
