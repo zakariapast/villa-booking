@@ -600,6 +600,7 @@ if (res.status === 201) {
     try {
       const res = await fetch('https://api.exchangerate.host/latest?base=IDR');
       const data = await res.json();
+      console.log("Raw exchange API response:", data);
       return data.rates;
     } catch (err) {
       console.error('Exchange rate fetch error:', err);
