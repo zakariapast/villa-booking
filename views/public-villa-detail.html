@@ -275,40 +275,60 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <script>
    let checkinPicker, checkoutPicker;
-  async function setupDatePickers() {
+ async function setupDatePickers() {
   const villaId = new URLSearchParams(window.location.search).get('id');
   let blockedRanges = [];
 
   try {
     const res = await fetch(`/api/bookings/calendar?villaId=${villaId}`);
-    if (res.ok) {
-      blockedRanges = await res.json();
-    }
+    if (res.ok) blockedRanges = await res.json();
   } catch (err) {
     console.error("Failed to load blocked dates:", err);
   }
 
+  // Helper: find next available date from today
+  function getNextAvailableDate(start = new Date()) {
+    let date = new Date(start);
+    for (let i = 0; i < 30; i++) {
+      const isBlocked = blockedRanges.some(range =>
+        date >= new Date(range.from) && date <= new Date(range.to)
+      );
+      if (!isBlocked) return date;
+      date.setDate(date.getDate() + 1);
+    }
+    return null;
+  }
+
+  const defaultCheckin = getNextAvailableDate();
+  const defaultCheckout = defaultCheckin ? new Date(defaultCheckin.getTime() + 24 * 60 * 60 * 1000) : null;
+
   checkinPicker = flatpickr("#checkin", {
     minDate: "today",
+    defaultDate: defaultCheckin,
     disable: blockedRanges,
-onChange: function (selectedDates) {
-  const checkinDate = selectedDates[0];
-  if (checkoutPicker && checkinDate) {
-    const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
-    checkoutPicker.set("minDate", nextDay);
-  }
-},
-allowInput: false
+    onChange: function (selectedDates) {
+      const checkinDate = selectedDates[0];
+      if (checkoutPicker && checkinDate) {
+        const nextDay = new Date(checkinDate.getTime() + 24 * 60 * 60 * 1000);
+        checkoutPicker.set("minDate", nextDay);
+      }
+      calculateTotalPrice();
+    },
+    allowInput: false,
   });
 
   checkoutPicker = flatpickr("#checkout", {
-    minDate: new Date().fp_incr(1),
-    disable: blockedRanges
+    minDate: defaultCheckout,
+    defaultDate: defaultCheckout,
+    disable: blockedRanges,
+    allowInput: false,
+    onChange: calculateTotalPrice
   });
 }
 async function init() {
   await loadVillaDetails();
   await setupDatePickers();
+  calculateTotalPrice(); // ensures it updates once form is ready
 }
 
 document.addEventListener('DOMContentLoaded', init);
@@ -404,6 +424,12 @@ async function loadRooms(villaId) {
       container.innerHTML = '<p class="text-muted">No rooms available for this villa.</p>';
       return;
     }
+    if (rooms.length > 0) {
+  const roomSelector = document.getElementById('roomSelector');
+  roomSelector.selectedIndex = 1; // skip the placeholder
+  calculateTotalPrice();
+}
+
 document.getElementById('roomSelector').addEventListener('change', () => {
   const roomPrice = Number(document.getElementById('roomSelector').value);
   if (!isNaN(roomPrice)) {
