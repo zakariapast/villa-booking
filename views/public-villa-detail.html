@@ -414,43 +414,31 @@ document.getElementById('roomSelector').addEventListener('change', calculateTota
     }
   }
 async function loadRooms(villaId) {
+  const roomSelector = document.getElementById('roomSelector');
+  const container = document.getElementById('roomList');
+
   try {
     const res = await fetch(`/api/rooms?villaId=${villaId}`);
     const rooms = await res.json();
-    const container = document.getElementById('roomList');
+
+    roomSelector.innerHTML = '<option value="">-- Choose a room --</option>';
     container.innerHTML = '';
 
     if (rooms.length === 0) {
       container.innerHTML = '<p class="text-muted">No rooms available for this villa.</p>';
+      roomSelector.disabled = true;
       return;
     }
-    if (rooms.length > 0) {
-  const roomSelector = document.getElementById('roomSelector');
-  roomSelector.selectedIndex = 1; // skip the placeholder
-  calculateTotalPrice();
-}
 
-document.getElementById('roomSelector').addEventListener('change', () => {
-  const roomPrice = Number(document.getElementById('roomSelector').value);
-  if (!isNaN(roomPrice)) {
-    // fallback: assume 1 night if no checkin/checkout selected yet
-    const checkin = document.getElementById('checkin')._flatpickr?.selectedDates[0];
-    const checkout = document.getElementById('checkout')._flatpickr?.selectedDates[0];
+    rooms.forEach((room, index) => {
+      // Add to dropdown
+      const option = document.createElement('option');
+      option.value = room.price;
+      option.setAttribute('data-room-id', room.id || room._id || "");
+      option.textContent = `${room.name} - IDR ${Number(room.price).toLocaleString()}/night`;
+      roomSelector.appendChild(option);
 
-    let nights = 1;
-    if (checkin && checkout) {
-      nights = Math.ceil((checkout - checkin) / (1000 * 60 * 60 * 24));
-      if (nights <= 0) nights = 1;
-    }
-
-    const estimated = nights * roomPrice;
-    updateEstimatedPrice(estimated);
-  }
-});
-
-
-
-    rooms.forEach(room => {
+      // Add to visual room list
       const roomCard = document.createElement('div');
       roomCard.className = 'room-card';
       roomCard.innerHTML = `
@@ -462,18 +450,22 @@ document.getElementById('roomSelector').addEventListener('change', () => {
       `;
       container.appendChild(roomCard);
     });
-    const roomSelector = document.getElementById('roomSelector');
-    roomSelector.innerHTML = '<option value="">-- Choose a room --</option>';
 
-    rooms.forEach(room => {
-    const option = document.createElement('option');
-    option.value = room.price;
-    option.setAttribute('data-room-id', room.id || room._id || "");
-    option.textContent = `${room.name} - IDR ${Number(room.price).toLocaleString()}/night`;
-    roomSelector.appendChild(option);
+    // Auto-select first available room
+    if (rooms.length > 0) {
+      roomSelector.selectedIndex = 1; // skip placeholder
+      calculateTotalPrice(); // Trigger calculation after selecting
+    }
+
+    // React on room change
+    roomSelector.addEventListener('change', () => {
+      const roomPrice = Number(roomSelector.value);
+      if (!isNaN(roomPrice)) {
+        calculateTotalPrice();
+      }
     });
-    roomSelector.disabled = rooms.length === 0;
 
+    roomSelector.disabled = false;
 
   } catch (err) {
     console.error("Failed to load rooms:", err);
@@ -486,9 +478,6 @@ document.getElementById('roomSelector').addEventListener('change', () => {
     el.style.overflow = "visible";
     document.querySelector(".show-more-btn").style.display = "none";
   }
-
-  // Call function
-  loadVillaDetails();
 
 </script>
   <script>
@@ -626,19 +615,22 @@ if (res.status === 201) {
     }).format(amount);
   }
 
-  async function updateEstimatedPrice(totalIDR = null) {
-    const selectedCurrency = document.getElementById('currencySelect')?.value;
-    if (!selectedCurrency || !totalIDR) return;
+async function updateEstimatedPrice(totalIDR = null) {
+  const currencySelect = document.getElementById('currencySelect');
+  if (!currencySelect || !totalIDR) return;
 
-    const rates = await getExchangeRates();
-    const rate = rates[selectedCurrency];
-    if (rate) {
-      const converted = totalIDR * rate;
-      document.getElementById('convertedPrice').textContent = `≈ ${formatCurrency(converted, selectedCurrency)}`;
-    } else {
-      document.getElementById('convertedPrice').textContent = 'Unavailable';
-    }
+  const selectedCurrency = currencySelect.value;
+  const rates = await getExchangeRates();
+  const rate = rates[selectedCurrency];
+
+  if (rate) {
+    const converted = totalIDR * rate;
+    document.getElementById('convertedPrice').textContent = `≈ ${formatCurrency(converted, selectedCurrency)}`;
+  } else {
+    document.getElementById('convertedPrice').textContent = 'Unavailable';
   }
+}
+
 
   // Hook into the price calculation
 async function calculateTotalPrice() {
