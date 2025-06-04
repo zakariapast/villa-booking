@@ -277,6 +277,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadRevenueStats();
 </script>
+  <script>
+  async function loadDashboardStats() {
+    try {
+      const res = await fetch('/api/dashboard/summary');
+      const stats = await res.json();
+
+      document.getElementById('tileRooms').textContent = stats.totalRooms;
+      document.getElementById('tileVillas').textContent = stats.totalVillas;
+      document.getElementById('tileBookings').textContent = stats.totalBookings;
+      document.getElementById('tileConfirmed').textContent = stats.confirmedBookings;
+    } catch (err) {
+      console.error('Dashboard stats error:', err);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadDashboardStats();
+  });
+</script>
+
 
 
 </body>
