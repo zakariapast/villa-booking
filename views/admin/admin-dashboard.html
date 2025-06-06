@@ -25,6 +25,36 @@
     .tile-purple { background-color: #6f42c1; }
     .tile-red { background-color: #dc3545; }
     .tile-dark { background-color: #343a40; }
+    .sidebar {
+      width: 220px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: #343a40;
+      padding-top: 60px;
+      color: white;
+    }
+    .sidebar a {
+      display: block;
+      padding: 10px 20px;
+      color: white;
+      text-decoration: none;
+    }
+    .sidebar a:hover {
+      background-color: #495057;
+    }
+    .sidebar a.active {
+      background-color: #495057;
+    }
+    .main-content {
+      margin-left: 220px;
+    }
+    .topbar {
+      background-color: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      padding: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -36,6 +66,9 @@
     <a href="/admin/bookings">Bookings</a>
     <a href="/admin/finance">Finance</a>
     <a href="/admin/users">Users Management</a>
+    <a href="#">Finance</a>
+    <a href="#">Users Management</a>
+    <a href="#">Settings</a>
   </div>
 
   <div class="main-content">
@@ -276,6 +309,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+
     const toggle = document.getElementById('sidebarToggle');
     if (toggle) {
       toggle.addEventListener('click', () => {
@@ -283,6 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.main-content').classList.toggle('collapsed');
       });
     }
+
   });
 </script>
 
