@@ -84,6 +84,11 @@ h1, h2, h3, h4 {
   background-color: #343a40;
   padding-top: 60px;
   color: #fff;
+  transition: margin-left 0.3s;
+}
+
+.sidebar.collapsed {
+  margin-left: -220px;
 }
 .sidebar a {
   display: block;
@@ -98,5 +103,10 @@ h1, h2, h3, h4 {
 
 .main-content {
   margin-left: 220px;
+  transition: margin-left 0.3s;
+}
+
+.main-content.collapsed {
+  margin-left: 0;
 }
 

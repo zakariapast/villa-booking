@@ -25,8 +25,8 @@
     <a href="/admin/bookings">Bookings</a>
     <a href="/admin/finance">Finance</a>
     <a href="/admin/users">Users Management</a>
-    <a href="#">Finance</a>
-    <a href="#">Users Management</a>
+    <div class="topbar d-flex justify-content-between align-items-center">
+      <button class="btn btn-light" id="sidebarToggle">&#9776;</button>
     <a href="#">Settings</a>
   </div>
 
@@ -121,6 +121,14 @@
       const formData = new FormData();
       formData.append('name', document.getElementById('name').value);
       formData.append('price', document.getElementById('price').value);
+
+      const toggle = document.getElementById('sidebarToggle');
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          document.querySelector('.sidebar').classList.toggle('collapsed');
+          document.querySelector('.main-content').classList.toggle('collapsed');
+        });
+      }
       formData.append('description', document.getElementById('description').value);
       formData.append('villaId', document.getElementById('villaId').value);
       const image = imageInput.files[0];

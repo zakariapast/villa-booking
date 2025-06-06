@@ -43,8 +43,8 @@
     <a href="/admin/bookings">Bookings</a>
     <a href="/admin/finance">Finance</a>
     <a href="/admin/users">Users Management</a>
-    <a href="#">Finance</a>
-    <a href="#">Users Management</a>
+    <div class="topbar d-flex justify-content-between align-items-center">
+      <button class="btn btn-light" id="sidebarToggle">&#9776;</button>
     <a href="#">Settings</a>
   </div>
 
@@ -106,6 +106,14 @@
                 <button onclick="deleteVilla('${v.id}')" class="btn btn-sm btn-danger">
                   <i class="fas fa-trash"></i> Delete
                 </button>
+
+      const toggle = document.getElementById('sidebarToggle');
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          document.querySelector('.sidebar').classList.toggle('collapsed');
+          document.querySelector('.main-content').classList.toggle('collapsed');
+        });
+      }
                 <span class="btn btn-sm ${v.visible ? 'btn-outline-success' : 'btn-outline-secondary'} disabled">
                   ${v.visible ? 'Visible to Public' : 'Hidden'}
                 </span>
