@@ -74,3 +74,29 @@ h1, h2, h3, h4 {
   font-weight: 600;
 }
 
+/* Sidebar Layout */
+.sidebar {
+  width: 220px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background-color: #343a40;
+  padding-top: 60px;
+  color: #fff;
+}
+.sidebar a {
+  display: block;
+  padding: 10px 20px;
+  color: #fff;
+  text-decoration: none;
+}
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #495057;
+}
+
+.main-content {
+  margin-left: 220px;
+}
+
