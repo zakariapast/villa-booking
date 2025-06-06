@@ -51,21 +51,13 @@
   <div class="main-content">
     <div class="topbar d-flex justify-content-between align-items-center">
       <button class="btn btn-light" id="sidebarToggle">&#9776;</button>
-    <a href="#">Finance</a>
-    <a href="#">Users Management</a>
-    <a href="#">Settings</a>
-  </div>
-
-  <div class="main-content">
-    <div class="topbar d-flex justify-content-end align-items-center">
-
       <div class="dropdown">
         <button class="btn btn-light dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
           Admin
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-          <li><a class="dropdown-item" href="#">Profile</a></li>
-          <li><a class="dropdown-item" href="#">Settings</a></li>
+          <li><a class="dropdown-item" href="/admin/profile">Profile</a></li>
+          <li><a class="dropdown-item" href="/admin/settings">Settings</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="/admin/logout">Logout</a></li>
         </ul>
@@ -221,7 +213,8 @@ function showBookingDetail(b) {
   `;
 }
 
-let selectedStatus = '';
+const params = new URLSearchParams(window.location.search);
+let selectedStatus = params.get('status') || '';
 
 function applyFilters() {
   const term = document.getElementById('searchInput').value.toLowerCase();
@@ -380,12 +373,19 @@ if (sortField) {
     });
 
     const toggle = document.getElementById('sidebarToggle');
-    if (toggle) {
-      toggle.addEventListener('click', () => {
-        document.querySelector('.sidebar').classList.toggle('collapsed');
-        document.querySelector('.main-content').classList.toggle('collapsed');
-      });
-    }
+      if (toggle) {
+        toggle.addEventListener('click', () => {
+          document.querySelector('.sidebar').classList.toggle('collapsed');
+          document.querySelector('.main-content').classList.toggle('collapsed');
+        });
+      }
+
+      const activeTab = document.querySelector(`#statusTabs .nav-link[data-status="${selectedStatus}"]`);
+      if (activeTab) {
+        document.querySelector('#statusTabs .nav-link.active')?.classList.remove('active');
+        activeTab.classList.add('active');
+        applyFilters();
+      }
   });
 </script>
 
