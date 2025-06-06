@@ -6,6 +6,8 @@
   <title>Admin Dashboard</title>
   <link rel="stylesheet" href="/public/css/admin.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <style>
     body { background-color: #f8f9fa; }
     .card:hover { box-shadow: 0 0 1rem rgba(0,0,0,0.05); transition: 0.3s; }
@@ -23,33 +25,6 @@
     .tile-purple { background-color: #6f42c1; }
     .tile-red { background-color: #dc3545; }
     .tile-dark { background-color: #343a40; }
-    .sidebar {
-      width: 220px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100%;
-      background-color: #343a40;
-      padding-top: 60px;
-      color: white;
-    }
-    .sidebar a {
-      display: block;
-      padding: 10px 20px;
-      color: white;
-      text-decoration: none;
-    }
-    .sidebar a:hover {
-      background-color: #495057;
-    }
-    .main-content {
-      margin-left: 220px;
-    }
-    .topbar {
-      background-color: white;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-      padding: 1rem;
-    }
   </style>
 </head>
 <body>
@@ -58,14 +33,14 @@
     <a href="/admin/dashboard">Dashboard</a>
     <a href="/admin/villas/list">Manage Villas</a>
     <a href="/admin/rooms/list">Manage Rooms</a>
-    <a href="/admin/list-bookings.html">Bookings</a>
-    <a href="#">Finance</a>
-    <a href="#">Users Management</a>
-    <a href="#">Settings</a>
+    <a href="/admin/bookings">Bookings</a>
+    <a href="/admin/finance">Finance</a>
+    <a href="/admin/users">Users Management</a>
   </div>
 
   <div class="main-content">
-    <div class="topbar d-flex justify-content-end align-items-center">
+    <div class="topbar d-flex justify-content-between align-items-center">
+      <button class="btn btn-light" id="sidebarToggle">&#9776;</button>
       <div class="dropdown">
         <button class="btn btn-light dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
           Admin
@@ -113,25 +88,25 @@
       <div class="row g-4 mb-5">
         <div class="col-md-3">
           <div class="dashboard-tile tile-blue">
-            <h3>11</h3>
+            <h3 id="tileRooms">11</h3>
             <p>Total Rooms</p>
           </div>
         </div>
         <div class="col-md-3">
           <div class="dashboard-tile tile-green">
-            <h3>9</h3>
+            <h3 id="tileVillas">9</h3>
             <p>Total Villas</p>
           </div>
         </div>
         <div class="col-md-3">
           <div class="dashboard-tile tile-orange">
-            <h3>6</h3>
+            <h3 id="tileBookings">6</h3>
             <p>All Bookings</p>
           </div>
         </div>
         <div class="col-md-3">
           <div class="dashboard-tile tile-purple">
-            <h3>3</h3>
+            <h3 id="tileConfirmed">3</h3>
             <p>Confirmed Bookings</p>
           </div>
         </div>
@@ -294,6 +269,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.addEventListener('DOMContentLoaded', () => {
     loadDashboardStats();
+    const path = window.location.pathname;
+    document.querySelectorAll('.sidebar a').forEach(a => {
+      if (a.getAttribute('href') === path) {
+        a.classList.add('active');
+      }
+    });
+
+    const toggle = document.getElementById('sidebarToggle');
+    if (toggle) {
+      toggle.addEventListener('click', () => {
+        document.querySelector('.sidebar').classList.toggle('collapsed');
+        document.querySelector('.main-content').classList.toggle('collapsed');
+      });
+    }
   });
 </script>
 
