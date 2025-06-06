@@ -109,3 +109,5 @@ h1, h2, h3, h4 {
   margin-left: 0;
 }
 
+
+.dashboard-tile { cursor: pointer; color: #fff; }

@@ -29,6 +29,8 @@ app.get('/admin/dashboard', (req, res) => res.sendFile(path.join(__dirname, 'vie
 app.get('/admin/bookings', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/list-bookings.html')));
 app.get('/admin/finance', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/finance.html')));
 app.get('/admin/users', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/users.html')));
+app.get('/admin/profile', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/profile.html')));
+app.get('/admin/settings', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/settings.html')));
 app.get('/admin/villas/list', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/list-villas.html')));
 app.get('/admin/villas/add', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/add-villa.html')));
 app.get('/admin/villas/edit', (req, res) => res.sendFile(path.join(__dirname, 'views/admin/edit-villa.html')));
@@ -47,10 +49,12 @@ const roomsRouter = require('./routes/rooms');
 const bookingsRouter = require('./routes/bookings');
 const authRouter = require('./routes/auth');
 const devRoutes = require('./routes/dev');
+const usersRouter = require('./routes/users');
 
 app.use('/api/villas', villasRouter);
 app.use('/api/rooms', roomsRouter);
 app.use('/api/bookings', bookingsRouter);
+app.use('/api/users', usersRouter);
 app.use('/dev', devRoutes);
 app.use(authRouter); // Already prefixed inside
 

@@ -23,20 +23,13 @@
   <div class="main-content">
     <div class="topbar d-flex justify-content-between align-items-center">
       <button class="btn btn-light" id="sidebarToggle">&#9776;</button>
-
-    <a href="#">Settings</a>
-  </div>
-
-  <div class="main-content">
-    <div class="topbar d-flex justify-content-end align-items-center">
-
       <div class="dropdown">
         <button class="btn btn-light dropdown-toggle" type="button" id="profileMenu" data-bs-toggle="dropdown" aria-expanded="false">
           Admin
         </button>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileMenu">
-          <li><a class="dropdown-item" href="#">Profile</a></li>
-          <li><a class="dropdown-item" href="#">Settings</a></li>
+          <li><a class="dropdown-item" href="/admin/profile">Profile</a></li>
+          <li><a class="dropdown-item" href="/admin/settings">Settings</a></li>
           <li><hr class="dropdown-divider"></li>
           <li><a class="dropdown-item" href="/admin/logout">Logout</a></li>
         </ul>
@@ -45,8 +38,23 @@
 
     <div class="container py-4">
       <h2 class="mb-4">User Management</h2>
-      <p>This section will manage users and roles.</p>
-      <div class="alert alert-info">User management dashboard coming soon...</div>
+      <table class="table" id="userTable">
+        <thead><tr><th>Username</th><th>Role</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <hr>
+      <h5>Add User</h5>
+      <form id="userForm" class="row g-2">
+        <div class="col-md-4"><input type="text" class="form-control" name="username" placeholder="Username" required></div>
+        <div class="col-md-4"><input type="password" class="form-control" name="password" placeholder="Password" required></div>
+        <div class="col-md-3">
+          <select class="form-select" name="role" required>
+            <option value="admin">admin</option>
+            <option value="staff">staff</option>
+          </select>
+        </div>
+        <div class="col-md-1"><button class="btn btn-primary w-100" type="submit">Add</button></div>
+      </form>
     </div>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -57,7 +65,6 @@
         }
       });
 
-
       const toggle = document.getElementById('sidebarToggle');
       if (toggle) {
         toggle.addEventListener('click', () => {
@@ -66,7 +73,28 @@
         });
       }
 
+      loadUsers();
+      document.getElementById('userForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const form = e.target;
+        const data = { username: form.username.value, password: form.password.value, role: form.role.value };
+        await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+        form.reset();
+        loadUsers();
+      });
     });
+
+    async function loadUsers() {
+      const res = await fetch('/api/users');
+      const users = await res.json();
+      const tbody = document.querySelector('#userTable tbody');
+      tbody.innerHTML = '';
+      users.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${u.username}</td><td>${u.role}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
   </script>
     </div> <!-- end container -->
   </div> <!-- end main-content -->
